@@ -6,6 +6,7 @@ export const envs = {
 
   PORT: get('PORT').required().asPortNumber(),
   JWT_SEED: get('JWT_SEED').required().asString(),
+  WEB_URL: get('WEB_URL').required().asUrlString(),
 
 }
 
