@@ -9,8 +9,6 @@ export const handleError = (res: Response, error: unknown) => {
     if (error instanceof CustomError) {
         return res.status(error.statusCode).json({ error: error.message })
     }
-
-    console.log(`${error}`);
     return res.status(500).json({ error: 'Internal server error' });
 
 };

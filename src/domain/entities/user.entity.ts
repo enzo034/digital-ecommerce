@@ -24,7 +24,7 @@ export class UserEntity {
 
 
         if (!id) throw CustomError.badRequest('Missing id');
-        if (!isUUID(id)) throw CustomError.badRequest('Client Id is not a valid Id');
+        // todo:if (!isUUID(id)) throw CustomError.badRequest('Client Id is not a valid Id');
         if (!email) throw CustomError.badRequest('Missing email');
         if (emailValidated === undefined) throw CustomError.badRequest('Missing emailValidated');
         if (!password) throw CustomError.badRequest('Missing password');
