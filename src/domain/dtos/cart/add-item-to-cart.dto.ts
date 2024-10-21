@@ -1,4 +1,4 @@
-import { isUUID } from "../../../config";
+import { isMongoId } from "../../../config";
 
 export class AddToCartDto {
     private constructor(
@@ -10,8 +10,8 @@ export class AddToCartDto {
     static create(object: { [key: string]: any }): [string?, AddToCartDto?] {
         const { userId, packageId, quantity = 0 } = object;
 
-        if (!userId || !isUUID(userId)) return ['Invalid or missing userId'];
-        if (!packageId || !isUUID(packageId)) return ['Invalid or missing packageId'];
+        if (!userId || !isMongoId(userId)) return ['Invalid or missing userId'];
+        if (!packageId || !isMongoId(packageId)) return ['Invalid or missing packageId'];
 
         const parsedQuantity = parseFloat(quantity);
 

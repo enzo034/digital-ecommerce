@@ -1,9 +1,9 @@
-import { isUUID } from "../../config";
+import { isMongoId } from "../../config";
 import { CustomError } from "../errors/custom-error";
 
 export enum UserRole {
-    USER = 'USER',
-    ADMIN = 'ADMIN',
+    USER = 'USER_ROLE',
+    ADMIN = 'ADMIN_ROLE',
 }
 
 export class UserEntity {
@@ -20,11 +20,11 @@ export class UserEntity {
 
     static fromObject(object: { [key: string]: any }): UserEntity {
 
-        const { id, email, emailValidated, password, username, role = UserRole.USER } = object; //todo: make role an enum
+        const { id, email, emailValidated, password, username, role = UserRole.USER } = object;
 
 
         if (!id) throw CustomError.badRequest('Missing id');
-        // todo:if (!isUUID(id)) throw CustomError.badRequest('Client Id is not a valid Id');
+        if (!isMongoId(id)) throw CustomError.badRequest('Client Id is not a valid Id');
         if (!email) throw CustomError.badRequest('Missing email');
         if (emailValidated === undefined) throw CustomError.badRequest('Missing emailValidated');
         if (!password) throw CustomError.badRequest('Missing password');

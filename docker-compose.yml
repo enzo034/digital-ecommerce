@@ -1,0 +1,11 @@
+
+
+services:
+
+  mongo-db:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - ./mongo:/data/db
+    ports:
+      - 27017:27017
