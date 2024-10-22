@@ -24,7 +24,11 @@ const userSchema = new Schema({
         type: [String],
         default: ['USER_ROLE'],
         enum: ['ADMIN_ROLE', 'USER_ROLE']
-    }
+    },
+    packages: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Package'
+    }]
 
 });
 

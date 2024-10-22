@@ -1,4 +1,5 @@
 import { JwtAdapter, bcryptAdapter, envs } from "../../config";
+import { UserModel } from "../../data/mongo";
 import { CustomError, LoginUserDto, RegisterUserDto } from "../../domain";
 //import { prisma } from "../../data/postgres";
 import { UserEntity } from "../../domain/entities/user.entity";
@@ -16,30 +17,28 @@ export class AuthService {
 
     public async registerUser(registerUserDto: RegisterUserDto) {
 
-        //todo: Verificar si el usuario existe en la base de datos
+        //Check if user exists
+        const user = await UserModel.findOne({ email: registerUserDto.email });
+        if (!user) throw CustomError.badRequest('User already exists');
 
-        // Hashear la contraseña
-        const hashedPassword = await bcryptAdapter.hash(registerUserDto.password);
+        // Encrypt the password
+        const hashedPassword = bcryptAdapter.hash(registerUserDto.password);
 
-        console.log(registerUserDto);
+        const { confirmPassword, ...userData } = registerUserDto;
 
-        //todo: Crear el usuario en la base de datos
-        let newUser: any = {
-            id: "550e8400-e29b-41d4-a716-446655440000",
-            email: registerUserDto.email,
-            emailValidated: false,
-            username: registerUserDto.username,
-            password: hashedPassword
-        };
+        userData.password = hashedPassword;
 
-        //Enviar mail de confirmación
+        // Create the new user
+        const newUser = await UserModel.create(userData);
+
+        // Send confirmation email
         this.sendEmailValidationLink(newUser.email);
 
-        // Generar token JWT
+        // Generate token
         const token = await JwtAdapter.generateToken({ id: newUser.id });
         if (!token) throw CustomError.internalServer('Error while creating JWT');
 
-        // Eliminar la contraseña del objeto de respuesta
+        // Send the data without the password
         const { password, ...userEntity } = UserEntity.fromObject(newUser);
 
         return {
@@ -51,12 +50,8 @@ export class AuthService {
 
     public async loginUser(loginUserDto: LoginUserDto) {
 
-        //todo: Verificar existencia del usuario/email en la base de datos
-        let user: any = {
-            id: "550e8400-e29b-41d4-a716-446655440000",
-            email: loginUserDto.email,
-            password: "12345"
-        };
+        const user = await UserModel.findOne({email: loginUserDto.email});
+        if(!user) throw CustomError.badRequest('Invalid email or password');
 
         const hasMatched = bcryptAdapter.compare(loginUserDto.password, user.password);
 
@@ -107,7 +102,7 @@ export class AuthService {
 
     }
 
-    public validateEmail = async (token: string) => {
+    public validateEmail = async (token: string) => { //todo: ver si es reentable la verificación por mail
 
         const payload = await JwtAdapter.validateToken(token);
         if (!payload) throw CustomError.unauthorized('Invalid token');
