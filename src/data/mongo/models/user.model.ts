@@ -21,8 +21,8 @@ const userSchema = new Schema({
         required: [true, 'Password is required']
     },
     role: {
-        type: [String],
-        default: ['USER_ROLE'],
+        type: String,
+        default: 'USER_ROLE',
         enum: ['ADMIN_ROLE', 'USER_ROLE']
     },
     packages: [{

@@ -19,7 +19,7 @@ export class AuthService {
 
         //Check if user exists
         const user = await UserModel.findOne({ email: registerUserDto.email });
-        if (!user) throw CustomError.badRequest('User already exists');
+        if (user) throw CustomError.badRequest('User already exists');
 
         // Encrypt the password
         const hashedPassword = bcryptAdapter.hash(registerUserDto.password);
@@ -32,14 +32,14 @@ export class AuthService {
         const newUser = await UserModel.create(userData);
 
         // Send confirmation email
-        this.sendEmailValidationLink(newUser.email);
+        //todo: this.sendEmailValidationLink(newUser.email);
 
         // Generate token
         const token = await JwtAdapter.generateToken({ id: newUser.id });
         if (!token) throw CustomError.internalServer('Error while creating JWT');
 
         // Send the data without the password
-        const { password, ...userEntity } = UserEntity.fromObject(newUser);
+        const { password, emailValidated , ...userEntity } = UserEntity.fromObject(newUser);
 
         return {
             user: { userEntity },

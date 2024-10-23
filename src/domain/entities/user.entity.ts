@@ -19,20 +19,22 @@ export class UserEntity {
     ) { }
 
     static fromObject(object: { [key: string]: any }): UserEntity {
-
         const { id, email, emailValidated, password, username, role = UserRole.USER } = object;
+        console.log(object);
 
 
         if (!id) throw CustomError.badRequest('Missing id');
         if (!isMongoId(id)) throw CustomError.badRequest('Client Id is not a valid Id');
+
         if (!email) throw CustomError.badRequest('Missing email');
         if (emailValidated === undefined) throw CustomError.badRequest('Missing emailValidated');
+        
         if (!password) throw CustomError.badRequest('Missing password');
+
         if (!username) throw CustomError.badRequest('Missing username');
 
-        if (!Object.values(UserRole).includes(role)) {
-            throw CustomError.badRequest('Invalid role');
-        }
+        if (!Object.values(UserRole).includes(role)) throw CustomError.badRequest('Invalid role');
+        
 
         return new UserEntity(id, email, emailValidated, password, username, role);
 
