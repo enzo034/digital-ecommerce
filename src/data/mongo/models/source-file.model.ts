@@ -6,7 +6,9 @@ const sourceFileSchema = new Schema({
     name: {
         type: String,
         required: [true, 'Name is required'],
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim: true
     },
     link: {
         type: String,
