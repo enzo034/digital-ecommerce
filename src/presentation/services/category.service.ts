@@ -1,3 +1,4 @@
+import { CategoryModel } from "../../data/mongo";
 import { CreateCategoryDto, CustomError, ModifyCategoryDto, DeleteCategoryDto } from "../../domain";
 import { CategoryEntity } from "../../domain/entities/category.entity";
 
@@ -13,65 +14,47 @@ export class CategoryService {
 
     async createCategory(createCategoryDto: CreateCategoryDto) {
 
-        //todo:check if the category exists
+        const categoryExists = await CategoryModel.findOne({ name: createCategoryDto.name })
         if (categoryExists) throw CustomError.badRequest('Category already exists');
 
-        try {
+        const category = await CategoryModel.create(createCategoryDto);
 
-            //todo: create the category
-
-            return CategoryEntity.fromObject(category);
-
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
+        return CategoryEntity.fromObject(category);
 
     }
 
     async getCategories() {
 
-        try {
+        const categories = await CategoryModel.find();
+        if (!categories.length) throw CustomError.notFound('No categories found.');
 
-            //todo get all categories
-            return categories.map(category => CategoryEntity.fromObject(category)); // Se retornan las entidades de las categorias.
-
-        } catch (error) {
-            throw CustomError.internalServer("Internal server error");
-        }
+        return categories.map(category => CategoryEntity.fromObject(category)); // Se retornan las entidades de las categorias.
 
     }
 
     async modifyCategory(modifyCategoryDto: ModifyCategoryDto) {
 
-        
-        //todo: check if category exists
+        const category = await CategoryModel.findById(modifyCategoryDto.categoryId);
         if (!category) throw CustomError.notFound(`Category with id : ${modifyCategoryDto.categoryId} not found.`);
 
-        try {
+        const modifiedCategory = await CategoryModel.findByIdAndUpdate(
+            modifyCategoryDto.categoryId,
+            { name: modifyCategoryDto.name },
+            { new: true }
+        );
 
-            //todo: update category
+        if (!modifiedCategory) throw CustomError.notFound(`Unable to update category with id: ${modifyCategoryDto.categoryId}`);
 
-            return CategoryEntity.fromObject(modifiedCategory);
-
-        } catch (error) {
-            throw CustomError.internalServer("Internal server error");
-        }
+        return CategoryEntity.fromObject(modifiedCategory);
 
     }
 
     async deleteCategory(deleteCategoryDto: DeleteCategoryDto) {
 
-        
-        //todo: check if category exists
-        if (!category) {
-            throw CustomError.notFound(`Category with id: ${deleteCategoryDto.categoryId} not found.`);
-        }
+        const category = await CategoryModel.findById(deleteCategoryDto.categoryId);
+        if (!category) throw CustomError.notFound(`Category with id: ${deleteCategoryDto.categoryId} not found.`);
 
-        try {
-            //todo: delete category
-        } catch (error) {
-            throw CustomError.internalServer("Internal server error");
-        }
+        await CategoryModel.deleteOne({ _id: deleteCategoryDto.categoryId });
 
     }
 

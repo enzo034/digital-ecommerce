@@ -18,8 +18,8 @@ export class CategoryEntity {
         
         if (!id) throw CustomError.badRequest('Missing id');
         if (!isMongoId(id)) throw CustomError.badRequest('Category Id is not a valid Id');
-        if (!name) throw CustomError.badRequest('Missing name');
 
+        if (!name) throw CustomError.badRequest('Missing name');
     
         return new CategoryEntity(id, name);
     }

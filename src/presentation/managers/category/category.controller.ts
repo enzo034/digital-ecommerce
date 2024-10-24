@@ -46,7 +46,7 @@ export class CategoryController {
         if (error) return res.status(400).json({ error });
 
         this.categoryService.deleteCategory(deleteCategoryDto!)
-            .then(categories => res.json({ categories }))
+            .then(() => res.sendStatus(204))
             .catch(error => handleError(res, error));
 
     };
