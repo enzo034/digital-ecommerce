@@ -19,9 +19,8 @@ export class UserEntity {
     ) { }
 
     static fromObject(object: { [key: string]: any }): UserEntity {
+        
         const { id, email, emailValidated, password, username, role = UserRole.USER } = object;
-        console.log(object);
-
 
         if (!id) throw CustomError.badRequest('Missing id');
         if (!isMongoId(id)) throw CustomError.badRequest('Client Id is not a valid Id');
