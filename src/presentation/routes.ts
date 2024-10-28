@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { AuthRoutes } from './managers/auth/auth.routes';
 import { CategoryRoutes } from './managers/category/category.routes';
 import { SourceFileRoutes } from './managers/sourceFile/source-file.routes';
+import { PackageRoutes } from './managers/package/package.routes';
 
 
 
@@ -18,6 +19,7 @@ export class AppRoutes {
     router.use('/api/auth', AuthRoutes.routes );
     router.use('/api/category', CategoryRoutes.routes );
     router.use('/api/source-file', SourceFileRoutes.routes );
+    router.use('/api/package', PackageRoutes.routes );
 
 
 
