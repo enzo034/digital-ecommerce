@@ -13,10 +13,6 @@ const cartSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Package',
             required: true
-        },
-        quantity: {
-            type: Number,
-            default: 1
         }
     }],
     totalPrice: {
