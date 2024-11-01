@@ -1,7 +1,8 @@
 
 import { CartModel, PackageModel } from "../../data/mongo";
 import { CustomError } from "../../domain";
-import { AddToCartDto } from "../../domain/dtos/cart/add-item-to-cart.dto";
+import { ModifyCartDto } from "../../domain/dtos/cart/add-item-to-cart.dto";
+import { CartEntity } from "../../domain/entities/cart.entity";
 
 
 
@@ -11,21 +12,20 @@ export class CartService {
 
 
     async getCart(userId: string) {
+
         const cart = await CartModel.findOne({ user: userId })
             .populate({
                 path: 'packages.packageId', // Traer también los packages incluidos en el carrito
-                select: 'name price description' 
+                select: 'name price description'
             });
-    
-        if(!cart) throw CustomError.notFound('Cart not found');
+        if (!cart) throw CustomError.notFound('Cart not found');
 
         return cart;
     }
-    
 
+    async addToCart(modifyCartDto: ModifyCartDto) {
 
-    async addToCart(addToCartDto: AddToCartDto) {
-        const { userId, packageId } = addToCartDto;
+        const { userId, packageId } = modifyCartDto;
         let response = {
             isNew: false, //Se retorna el cliente para saber si el package ya existia o no
             packageId: packageId, // Retorna el id del package
@@ -33,19 +33,13 @@ export class CartService {
 
         // Busca el paquete directamente para obtener su precio
         const packageData = await PackageModel.findById(packageId).select('price');
-        if (!packageData) {
-            throw CustomError.notFound('Package not found');
-        }
+        if (!packageData) throw CustomError.notFound('Package not found');
 
-        // Actualiza o crea el carrito en una sola operación
         const updateResult = await CartModel.findOne(
             { user: userId, "packages.packageId": packageId }
         );
 
-        if (updateResult) {
-            // Si el package ya existe, devuelve el resultado
-            return response;
-        }
+        if (updateResult) return response; // Si el package ya existe, devuelve el resultado
 
         // Si el package no existía en el carrito, se agrega
         await CartModel.findOneAndUpdate(
@@ -57,9 +51,36 @@ export class CartService {
             { upsert: true, new: true }
         );
 
-        response.isNew = true;  // Marca el paquete como nuevo
+        response.isNew = true;
+
         return response;
 
     }
+
+    async deleteItemFromCart(modifyCartDto: ModifyCartDto) {
+        const { userId, packageId } = modifyCartDto;
+
+        // Busca el cart
+        const cart = await CartModel.findOne({ user: userId });
+        if (!cart) throw CustomError.notFound('Cart not found');
+
+        // Busca el package
+        const packageData = await PackageModel.findById(packageId).select('price');
+        if (!packageData) throw CustomError.notFound('Package not found');
+
+        // Elimina el package y ajusta el totalPrice
+        const updatedCart = await CartModel.findOneAndUpdate(
+            { user: userId },
+            {
+                $pull: { packages: { packageId } },
+                $inc: { totalPrice: -packageData.price }
+            },
+            { new: true }
+        );
+
+        return updatedCart;
+    }
+
+
 
 }
