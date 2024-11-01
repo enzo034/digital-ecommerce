@@ -3,6 +3,7 @@ import { AuthRoutes } from './managers/auth/auth.routes';
 import { CategoryRoutes } from './managers/category/category.routes';
 import { SourceFileRoutes } from './managers/sourceFile/source-file.routes';
 import { PackageRoutes } from './managers/package/package.routes';
+import { CartRoutes } from './managers/cart/cart.routes';
 
 
 
@@ -20,8 +21,7 @@ export class AppRoutes {
     router.use('/api/category', CategoryRoutes.routes );
     router.use('/api/source-file', SourceFileRoutes.routes );
     router.use('/api/package', PackageRoutes.routes );
-
-
+    router.use('/api/cart', CartRoutes.routes );
 
     return router;
   }

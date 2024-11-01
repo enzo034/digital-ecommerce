@@ -10,6 +10,19 @@ export class CartService {
     constructor() { }
 
 
+    async getCart(userId: string) {
+        const cart = await CartModel.findOne({ user: userId })
+            .populate({
+                path: 'packages.packageId', // Traer también los packages incluidos en el carrito
+                select: 'name price description' 
+            });
+    
+        if(!cart) throw CustomError.notFound('Cart not found');
+
+        return cart;
+    }
+    
+
 
     async addToCart(addToCartDto: AddToCartDto) {
         const { userId, packageId } = addToCartDto;
@@ -25,13 +38,8 @@ export class CartService {
         }
 
         // Actualiza o crea el carrito en una sola operación
-        const updateResult = await CartModel.findOneAndUpdate(
-            { user: userId, "packages.packageId": packageId },
-            {
-                // Si el package existe, incrementa la cantidad y el totalPrice del carrito
-                $inc: { totalPrice: packageData.price }
-            },
-            { new: true }
+        const updateResult = await CartModel.findOne(
+            { user: userId, "packages.packageId": packageId }
         );
 
         if (updateResult) {
