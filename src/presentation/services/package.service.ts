@@ -1,15 +1,51 @@
 import { PackageModel } from "../../data/mongo";
 import { CustomError } from "../../domain";
 import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
+import { PaginationDto } from "../../domain/dtos/package/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
 
+type SortOrder = 1 | -1;
 
+export interface ProductOptions {
+    paginationDto: PaginationDto;
+    urlParameter?: string;
+    where?: Record<string, any>; // Definición de where mongoose
+    orderBy?: { [key: string]: SortOrder } | [string, SortOrder][]; // Definición de order by mongoose
+}
 
 
 export class PackageService {
 
+    
     constructor() {}
+    
+    async getProductsCommon(productOptions: ProductOptions) {
+        const { paginationDto, orderBy, urlParameter = '/', where } = productOptions;
+        const { page, limit } = paginationDto;
 
+        try {
+            const total = await PackageModel.countDocuments(where);
+
+            const packageModel = await PackageModel.find(where || {})
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .sort(orderBy);
+
+            const packageEntities = packageModel.map(product => PackageEntity.fromObject(product));
+
+            return {
+                page,
+                limit,
+                total,
+                next: (page * limit < total) ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null,
+                prev: (page - 1 > 0) ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null,
+                products: packageEntities,
+            };
+
+        } catch (error) {
+            throw new Error("Internal server error");
+        }
+    }
 
     async createPackage(createPackageDto: CreatePackageDto) {
 
