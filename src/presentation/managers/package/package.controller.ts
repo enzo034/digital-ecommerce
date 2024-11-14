@@ -3,6 +3,7 @@ import { handleError } from "../../../config/handle-error";
 import { PackageService } from "../../services/package.service";
 import { CreatePackageDto } from "../../../domain/dtos/package/create-package.dto";
 import { PaginationDto } from "../../../domain/dtos/package/pagination.dto";
+import { ModifyPackageDto } from "../../../domain/dtos/package/modify-package.dto";
 
 type SortOrder = 1 | -1;
 
@@ -94,5 +95,14 @@ export class PackageController {
             .then(packageRes => res.status(201).json(packageRes))
             .catch(error => handleError(res, error));
     };
+
+    modifyPackage = (req: Request, res: Response) => {
+        const [error, modifyPackageDto] = ModifyPackageDto.create(req.body);
+        if (error) return res.status(400).json({ error });
+
+        this.packageService.modifyPackage(modifyPackageDto!)
+            .then(resp => res.status(201).json(resp))
+            .catch(error => handleError(res, error));
+    }
 
 }

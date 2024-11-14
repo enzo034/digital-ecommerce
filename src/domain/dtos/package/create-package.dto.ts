@@ -1,6 +1,4 @@
 import { isMongoId } from "../../../config";
-import { CategoryEntity } from "../../entities/category.entity";
-import { SourceFileEntity } from "../../entities/source-file.entity";
 
 export class CreatePackageDto {
     private constructor(

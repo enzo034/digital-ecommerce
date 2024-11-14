@@ -18,7 +18,7 @@ export class SourceFileEntity {
         const { id, name, link } = object;
 
         if (!id) throw CustomError.badRequest('Missing id');
-        if (!isMongoId(id)) throw CustomError.badRequest('Category Id is not a valid Id');
+        if (!isMongoId(id)) throw CustomError.badRequest('Source File Id is not a valid Id');
         
         if (!name) throw CustomError.badRequest('Missing name');
 

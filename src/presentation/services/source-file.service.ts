@@ -14,13 +14,20 @@ export class SourceFileService {
 
     async createSourceFile(createSourceFileDto: CreateSourceFileDto) {
 
-        const sourceFileExists = await SourceFileModel.findOne({ name: createSourceFileDto.name })
-        if (sourceFileExists) throw CustomError.badRequest('SourceFile already exists');
+        const { name, link } = createSourceFileDto;
+
+        const existingSourceFile = await SourceFileModel.findOne({
+            $or: [{ name }, { link }]
+        });
+    
+        if (existingSourceFile) {
+            const conflictField = existingSourceFile.name === name ? 'name' : 'link';
+            throw CustomError.badRequest(`SourceFile ${conflictField} already exists`);
+        }
 
         const sourceFile = await SourceFileModel.create(createSourceFileDto);
 
         return SourceFileEntity.fromObject(sourceFile);
-
 
     }
 
@@ -35,16 +42,16 @@ export class SourceFileService {
 
     async modifySourceFile(modifySourcefileDto: ModifySourceFileDto) {
 
-        const sourceFile = await SourceFileModel.findById(modifySourcefileDto.sourceFileId);
-        if (!sourceFile) throw CustomError.notFound(`SourceFiles with id : ${modifySourcefileDto.sourceFileId} not found.`);
+        const sourceFile = await SourceFileModel.findById(modifySourcefileDto.id);
+        if (!sourceFile) throw CustomError.notFound(`SourceFiles with id : ${modifySourcefileDto.id} not found.`);
 
         const modifiedSourceFile = await SourceFileModel.findByIdAndUpdate(
-            modifySourcefileDto.sourceFileId,
+            modifySourcefileDto.id,
             { name: modifySourcefileDto.name },
             { new: true }
         );
 
-        if (!modifiedSourceFile) throw CustomError.notFound(`Unable to update sourceFile with id: ${modifySourcefileDto.sourceFileId}`);
+        if (!modifiedSourceFile) throw CustomError.notFound(`Unable to update sourceFile with id: ${modifySourcefileDto.id}`);
 
         return SourceFileEntity.fromObject(modifiedSourceFile);
 
