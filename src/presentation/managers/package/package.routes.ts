@@ -24,6 +24,7 @@ export class PackageRoutes {
 
         router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.createPackage);
 
+        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyPackage);
 
         return router;
     }
