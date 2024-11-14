@@ -17,14 +17,14 @@ export class SourceFileController {
         if (error) return res.status(400).json({ error });
     
         this.sourceFileService.createSourceFile(createSourceFileDto!)
-            .then(category => res.status(201).json(category))
+            .then(sourceFile => res.status(201).json(sourceFile))
             .catch(error => handleError(res, error));
     };
 
     getSourceFiles = (req: Request, res: Response) => {
 
         this.sourceFileService.getSourceFiles()
-            .then(categories => res.json({ categories }))
+            .then(sourceFiles => res.json({ sourceFiles }))
             .catch(error => handleError(res, error));
 
     };

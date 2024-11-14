@@ -14,8 +14,8 @@ export class PackageEntity {
         public previewImage: string,
         public description: string,
         public price: number,
-        public sourceFiles: string[],
         public categories: string[],
+        public sourceFiles?: string[],
 
     ) { }
 
@@ -34,11 +34,13 @@ export class PackageEntity {
 
         if (!price) throw CustomError.badRequest('Missing price');
 
-        if (!Array.isArray(sourceFiles)) throw CustomError.badRequest('SourceFiles should be an array');
+        if(sourceFiles) {
+            if (!Array.isArray(sourceFiles)) throw CustomError.badRequest('SourceFiles should be an array');
+        }
 
         if (!Array.isArray(categories)) throw CustomError.badRequest('Categories should be an array');
 
-        return new PackageEntity(id, name, previewImage, description, price, sourceFiles, categories);
+        return new PackageEntity(id, name, previewImage, description, price, categories, sourceFiles);
 
     };
 

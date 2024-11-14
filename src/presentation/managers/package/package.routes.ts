@@ -18,8 +18,12 @@ export class PackageRoutes {
         const controller = new PackageController(packageService);
 
         // Definir las rutas
-        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.createPackage);
-        
+        router.get('/', [AuthMiddleware.validateJWT], controller.getPackages);
+        router.get('/category/:categoryId', controller.getPackagesByCategory);
+        router.get('/word/:word', controller.getPackagesByWord);
+
+        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.createPackage);
+
 
         return router;
     }

@@ -6,7 +6,7 @@ import { PackageEntity } from "../../domain/entities/package.entity";
 
 type SortOrder = 1 | -1;
 
-export interface ProductOptions {
+export interface PackageOptions {
     paginationDto: PaginationDto;
     urlParameter?: string;
     where?: Record<string, any>; // Definición de where mongoose
@@ -19,14 +19,15 @@ export class PackageService {
     
     constructor() {}
     
-    async getProductsCommon(productOptions: ProductOptions) {
-        const { paginationDto, orderBy, urlParameter = '/', where } = productOptions;
+    async getPackagesCommon(packageOptions: PackageOptions) {
+        const { paginationDto, orderBy, urlParameter = '/', where } = packageOptions;
         const { page, limit } = paginationDto;
 
         try {
             const total = await PackageModel.countDocuments(where);
 
             const packageModel = await PackageModel.find(where || {})
+            .select('-sourceFiles')
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy);
@@ -39,7 +40,7 @@ export class PackageService {
                 total,
                 next: (page * limit < total) ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null,
                 prev: (page - 1 > 0) ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null,
-                products: packageEntities,
+                packages: packageEntities,
             };
 
         } catch (error) {

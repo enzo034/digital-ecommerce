@@ -25,7 +25,7 @@ export class PackageController {
     private parseOrderBy(orderByQuery: string): [string, SortOrder][] {
         return orderByQuery.split(',').reduce((acc, param) => {
             const [field, order] = param.split(':');
-            acc.push([field, order === 'desc' ? -1 : 1]); 
+            acc.push([field, order === 'desc' ? -1 : 1]);
             return acc;
         }, [] as [string, SortOrder][]);
     }
@@ -52,7 +52,7 @@ export class PackageController {
     }
 
 
-    private handleGetProducts(req: Request, res: Response, additionalWhere: Record<string, any>, urlParameter: string) {
+    private handleGetPackages(req: Request, res: Response, additionalWhere: Record<string, any>, urlParameter: string) {
         const [error, paginationDto, orderByParams, priceWhere] = this.getQueryParams(req);
         if (error) return res.status(400).json({ error });
 
@@ -62,18 +62,28 @@ export class PackageController {
         };
 
         // Asegurándote de que orderByParams es en el formato correcto [campo, orden]
-        this.packageService.getProductsCommon({
+        this.packageService.getPackagesCommon({
             paginationDto: paginationDto!,
             urlParameter: urlParameter,
             where: where,
             orderBy: orderByParams, // Mongoose lo acepta como [string, number][]
         })
-            .then(products => res.status(200).json({ products }))
+            .then(packages => res.status(200).json({ packages }))
             .catch(error => handleError(res, error));
     }
 
-    getProducts = (req: Request, res: Response) => {
-        this.handleGetProducts(req, res, {}, '/');
+    getPackages = (req: Request, res: Response) => {
+        this.handleGetPackages(req, res, {}, '/');
+    }
+
+    getPackagesByCategory = (req: Request, res: Response) => {
+        const { categoryId } = req.params;
+        this.handleGetPackages(req, res, { categories: { $in: [categoryId] } }, `/category/${categoryId}`);
+    }
+
+    getPackagesByWord = (req: Request, res: Response) => {
+        const { word } = req.params;
+        this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`);
     }
 
     createPackage = (req: Request, res: Response) => {
