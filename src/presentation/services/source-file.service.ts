@@ -47,7 +47,7 @@ export class SourceFileService {
 
         const modifiedSourceFile = await SourceFileModel.findByIdAndUpdate(
             modifySourcefileDto.id,
-            { name: modifySourcefileDto.name },
+            modifySourcefileDto,
             { new: true }
         );
 
