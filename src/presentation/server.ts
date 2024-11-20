@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express, { Request, Response, Router } from 'express';
 import cors from 'cors'
 
 interface Options {
@@ -21,22 +21,26 @@ export class Server {
     this.routes = routes;
   }
 
-  
-  
+
+
   async start() {
-    
+
 
     //* Middlewares
-    this.app.use( express.json() ); // raw
-    this.app.use( express.urlencoded({ extended: true }) ); // x-www-form-urlencoded
+    this.app.use(express.json({
+      verify: (req: Request & { rawBody?: string }, res: Response, buf: Buffer) => { // Se debe extender rawBody ya que no existe la propiedad como tal
+        req.rawBody = buf.toString();
+      }
+    })) // from raw
+    this.app.use(express.urlencoded({ extended: true })); // from x-www-form-urlencoded
 
     this.app.use(cors());
 
     //* Routes
-    this.app.use( this.routes );
+    this.app.use(this.routes);
 
     this.serverListener = this.app.listen(this.port, () => {
-      console.log(`Server running on port ${ this.port }`);
+      console.log(`Server running on port ${this.port}`);
     });
 
   }
