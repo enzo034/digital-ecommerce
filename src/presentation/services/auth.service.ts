@@ -1,4 +1,4 @@
-import { JwtAdapter, bcryptAdapter, envs } from "../../config";
+import { JwtAdapter, BcryptAdapter, envs } from "../../config";
 import { UserModel } from "../../data/mongo";
 import { CustomError, LoginUserDto, RegisterUserDto } from "../../domain";
 //import { prisma } from "../../data/postgres";
@@ -22,7 +22,7 @@ export class AuthService {
         if (user) throw CustomError.badRequest('User already exists');
 
         // Encrypt the password
-        const hashedPassword = bcryptAdapter.hash(registerUserDto.password);
+        const hashedPassword = BcryptAdapter.hash(registerUserDto.password);
 
         const { confirmPassword, ...userData } = registerUserDto;
 
@@ -53,7 +53,7 @@ export class AuthService {
         const user = await UserModel.findOne({email: loginUserDto.email});
         if(!user) throw CustomError.badRequest('Invalid email or password');
 
-        const hasMatched = bcryptAdapter.compare(loginUserDto.password, user.password);
+        const hasMatched = BcryptAdapter.compare(loginUserDto.password, user.password);
 
         if (!hasMatched) throw CustomError.badRequest('Invalid email or password');
 

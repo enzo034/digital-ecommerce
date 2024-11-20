@@ -9,11 +9,9 @@ const cartSchema = new Schema({
         required: [true, 'User is required']
     },
     packages: [{
-        packageId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Package',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Package',
+        required: true
     }],
     totalPrice: {
         type: Number
@@ -25,6 +23,8 @@ const cartSchema = new Schema({
     }
 
 });
+
+cartSchema.index({ user: 1, status: 1 }, { unique: true, partialFilterExpression: { status: 'ACTIVE' } });
 
 cartSchema.set('toJSON', {
     virtuals: true,

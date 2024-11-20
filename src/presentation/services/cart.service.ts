@@ -15,7 +15,7 @@ export class CartService {
 
         const cart = await CartModel.findOne({ user: userId })
             .populate({
-                path: 'packages.packageId', // Traer también los packages incluidos en el carrito
+                path: 'packages', // Traer también los packages incluidos en el carrito
                 select: 'name price description'
             });
         if (!cart) throw CustomError.notFound('Cart not found');
@@ -36,7 +36,7 @@ export class CartService {
         if (!packageData) throw CustomError.notFound('Package not found');
 
         const updateResult = await CartModel.findOne(
-            { user: userId, "packages.packageId": packageId }
+            { user: userId, "packages": packageId }
         );
 
         if (updateResult) return response; // Si el package ya existe, devuelve el resultado
@@ -45,7 +45,7 @@ export class CartService {
         await CartModel.findOneAndUpdate(
             { user: userId },
             {
-                $push: { packages: { packageId } },
+                $push: { packages: packageId },
                 $inc: { totalPrice: packageData.price }
             },
             { upsert: true, new: true }
@@ -72,7 +72,7 @@ export class CartService {
         const updatedCart = await CartModel.findOneAndUpdate(
             { user: userId },
             {
-                $pull: { packages: { packageId } },
+                $pull: { packages: packageId },
                 $inc: { totalPrice: -packageData.price }
             },
             { new: true }
