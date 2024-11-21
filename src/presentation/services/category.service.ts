@@ -34,16 +34,16 @@ export class CategoryService {
 
     async modifyCategory(modifyCategoryDto: ModifyCategoryDto) {
 
-        const category = await CategoryModel.findById(modifyCategoryDto.categoryId);
-        if (!category) throw CustomError.notFound(`Category with id : ${modifyCategoryDto.categoryId} not found.`);
+        const category = await CategoryModel.findById(modifyCategoryDto.id);
+        if (!category) throw CustomError.notFound(`Category with id : ${modifyCategoryDto.id} not found.`);
 
         const modifiedCategory = await CategoryModel.findByIdAndUpdate(
-            modifyCategoryDto.categoryId,
+            modifyCategoryDto.id,
             { name: modifyCategoryDto.name },
             { new: true }
         );
 
-        if (!modifiedCategory) throw CustomError.notFound(`Unable to update category with id: ${modifyCategoryDto.categoryId}`);
+        if (!modifiedCategory) throw CustomError.notFound(`Unable to update category with id: ${modifyCategoryDto.id}`);
 
         return CategoryEntity.fromObject(modifiedCategory);
 
@@ -51,10 +51,10 @@ export class CategoryService {
 
     async deleteCategory(deleteCategoryDto: DeleteCategoryDto) {
 
-        const category = await CategoryModel.findById(deleteCategoryDto.categoryId);
-        if (!category) throw CustomError.notFound(`Category with id: ${deleteCategoryDto.categoryId} not found.`);
+        const category = await CategoryModel.findById(deleteCategoryDto.id);
+        if (!category) throw CustomError.notFound(`Category with id: ${deleteCategoryDto.id} not found.`);
 
-        await CategoryModel.deleteOne({ _id: deleteCategoryDto.categoryId });
+        await CategoryModel.deleteOne({ _id: deleteCategoryDto.id });
 
     }
 
