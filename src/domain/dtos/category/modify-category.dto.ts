@@ -5,19 +5,19 @@ import { isMongoId } from "../../../config";
 export class ModifyCategoryDto {
 
     private constructor(
-        public readonly categoryId: string,
+        public readonly id: string,
         public readonly name?: string,
 
     ) { }
 
     static create(object: { [key: string]: any }): [string?, ModifyCategoryDto?] {
 
-        const { categoryId, name } = object;
+        const { id, name } = object;
 
-        if (!categoryId) return ['Missing categoryId'];
-        if (!isMongoId(categoryId)) return ['Category id is not a valid id'];
+        if (!id) return ['Missing categoryId'];
+        if (!isMongoId(id)) return ['Category id is not a valid id'];
 
-        return [undefined, new ModifyCategoryDto(categoryId, name)];
+        return [undefined, new ModifyCategoryDto(id, name)];
 
     }
 
