@@ -15,6 +15,10 @@ export const envs = {
   MAILER_EMAIL: get('MAILER_EMAIL').required().asEmailString(),
   MAILER_SERCRET_KEY: get('MAILER_SERCRET_KEY').required().asString(),
 
+  CLOUDINARY_CLOUD_NAME: get("CLOUDINARY_CLOUD_NAME").required().asString(),
+  CLOUDINARY_API_KEY: get("CLOUDINARY_API_KEY").required().asString(),
+  CLOUDINARY_API_SECRET: get("CLOUDINARY_API_SECRET").required().asString(),
+
   MONGO_DB_NAME: get('MONGO_DB_NAME').required().asString(),
   MONGO_URL: get('MONGO_URL').required().asUrlString()
 

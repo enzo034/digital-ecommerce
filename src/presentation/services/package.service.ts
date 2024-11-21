@@ -4,6 +4,7 @@ import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
 import { ModifyPackageDto } from "../../domain/dtos/package/modify-package.dto";
 import { PaginationDto } from "../../domain/dtos/package/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
+import { ImageService } from "./image.service";
 
 type SortOrder = 1 | -1;
 
@@ -18,7 +19,9 @@ export interface PackageOptions {
 export class PackageService {
 
 
-    constructor() { }
+    constructor(
+        private readonly imageService: ImageService,
+    ) { }
 
     async getPackagesCommon(packageOptions: PackageOptions) {
         const { paginationDto, orderBy, urlParameter = '/', where } = packageOptions;
