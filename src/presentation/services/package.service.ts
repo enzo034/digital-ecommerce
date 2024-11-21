@@ -1,3 +1,4 @@
+import { UploadedFile } from "express-fileupload";
 import { PackageModel } from "../../data/mongo";
 import { CustomError } from "../../domain";
 import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
@@ -52,12 +53,35 @@ export class PackageService {
         }
     }
 
-    async createPackage(createPackageDto: CreatePackageDto) {
+    async createPackage(createPackageDto: CreatePackageDto, imageFile: UploadedFile[]) {
 
-        const packageModel = await PackageModel.findOne({ name: createPackageDto.name });
-        if (packageModel) throw CustomError.badRequest('Package already exists.');
+        if (!imageFile || imageFile.length === 0) throw CustomError.badRequest('An image file is required');
 
-        const newPackage = await PackageModel.create(createPackageDto);
+        if (imageFile.length > 1) throw CustomError.badRequest('A single image should be uploaded');
+
+        const existingPackage = await PackageModel.findOne({ name: createPackageDto.name });
+        if (existingPackage) throw CustomError.badRequest('Package already exists.');
+
+        let primaryImage: string | undefined;
+        try {
+            const uploadImagesResult = await this.imageService.uploadImages(imageFile);
+            primaryImage = uploadImagesResult[0]
+                ? this.imageService.transformSingleImage(uploadImagesResult[0].public_id)
+                : undefined;
+        } catch (error) {
+            throw CustomError.internalServer('Failed to upload package image');
+        }
+
+        const { name, description, price, sourceFiles, categories } = createPackageDto;
+
+        const newPackage = await PackageModel.create({
+            name,
+            description,
+            price,
+            sourceFiles,
+            categories,
+            previewImage: primaryImage,
+        });
 
         return PackageEntity.fromObject(newPackage);
 
@@ -72,7 +96,7 @@ export class PackageService {
 
             const updatedPackage = await PackageModel.findByIdAndUpdate(
                 modifyPackageDto.id,
-                modifyPackageDto, 
+                modifyPackageDto,
                 { new: true }
             );
 

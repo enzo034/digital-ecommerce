@@ -15,8 +15,6 @@ export class CreatePackageDto {
 
         if (!name) return ['Missing name'];
 
-        if (!previewImage) return ['Missing previewImage'];
-
         if (!description) return ['Missing description'];
 
         if (!price) return ['Missing price'];

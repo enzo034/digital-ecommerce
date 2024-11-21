@@ -26,7 +26,7 @@ export class ImageUploader {
       const uploadPromises = files.map(file => new Promise<CloudinaryUploadResult>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           {
-            folder: 'products',
+            folder: 'packages',
             transformation: [
               { quality: 'auto' },
               { fetch_format: 'auto' }

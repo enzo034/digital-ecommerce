@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { AuthMiddleware } from '../../middlewares/auth.middleware';
 import { PackageController } from './package.controller';
 import { PackageService } from '../../services/package.service';
+import { ImageService } from '../../services/image.service';
+import { FileTypeMiddleware } from '../../middlewares/file-upload.middleware';
 
 
 
@@ -12,8 +14,8 @@ export class PackageRoutes {
 
         const router = Router();
 
-
-        const packageService = new PackageService();
+        const imageService = new ImageService();
+        const packageService = new PackageService(imageService);
 
         const controller = new PackageController(packageService);
 
@@ -22,7 +24,7 @@ export class PackageRoutes {
         router.get('/category/:categoryId', controller.getPackagesByCategory);
         router.get('/word/:word', controller.getPackagesByWord);
 
-        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.createPackage);
+        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin, FileTypeMiddleware.validateExtension], controller.createPackage);
 
         router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyPackage);
 

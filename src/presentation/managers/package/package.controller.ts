@@ -91,7 +91,7 @@ export class PackageController {
         const [error, createPackageDto] = CreatePackageDto.create(req.body);
         if (error) return res.status(400).json({ error });
 
-        this.packageService.createPackage(createPackageDto!)
+        this.packageService.createPackage(createPackageDto!, req.body.files)
             .then(packageRes => res.status(201).json(packageRes))
             .catch(error => handleError(res, error));
     };

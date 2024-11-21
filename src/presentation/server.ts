@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import cors from 'cors'
+import fileUpload from 'express-fileupload';
 
 interface Options {
   port: number;
@@ -33,8 +34,10 @@ export class Server {
       }
     })) // from raw
     this.app.use(express.urlencoded({ extended: true })); // from x-www-form-urlencoded
-
     this.app.use(cors());
+    this.app.use(fileUpload({
+      limits: { fileSize: 50 * 1024 * 1024 },
+    }));
 
     //* Routes
     this.app.use(this.routes);
