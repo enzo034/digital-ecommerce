@@ -1,5 +1,10 @@
-import {Schema, model} from "mongoose";
+import {Schema, model, Document} from "mongoose";
 
+interface Category {
+    name: string,
+}
+
+export type CategoryDocument = Document & Category;
 
 const categorySchema = new Schema({
 
@@ -21,4 +26,4 @@ categorySchema.set('toJSON', {
     },
 });
 
-export const CategoryModel = model('Category', categorySchema);
+export const CategoryModel = model<CategoryDocument>('Category', categorySchema);

@@ -1,14 +1,15 @@
-import { Document, Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
-interface Cart {
+interface Order {
     user: string,
     packages: string[],
     totalPrice: number,
+    date: Date,
 }
 
-export type CartDocument = Document & Cart;
+export type OrderDocument = Document & Order;
 
-const cartSchema = new Schema({
+const orderSchema = new Schema({
 
     user: {
         type: Schema.Types.ObjectId,
@@ -23,10 +24,17 @@ const cartSchema = new Schema({
     totalPrice: {
         type: Number,
         min: [0, 'Total price must be positive'],
+        required: true
     },
+    date: {
+        type: Date,
+        default: Date.now()
+    }
+
 });
 
-cartSchema.set('toJSON', {
+
+orderSchema.set('toJSON', {
     virtuals: true,
     versionKey: false,
     transform: function (doc, ret, options) {
@@ -34,4 +42,4 @@ cartSchema.set('toJSON', {
     },
 });
 
-export const CartModel = model<CartDocument>('Cart', cartSchema);
+export const OrderModel = model<OrderDocument>('Order', orderSchema);
