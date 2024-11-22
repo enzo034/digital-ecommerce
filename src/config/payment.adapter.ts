@@ -5,14 +5,14 @@ const MERCHANT_ID = ""; // falta solicitar, adaptar en .env y envs
 
 export class PaymentAdapter {
 
-    static async createPaymentLink(price: number, cartId: string): Promise<string> {
+    static async createPaymentLink(price: number, orderId: string): Promise<string> {
 
         const link = `payment/${price}`; //De testeo hasta que se obtengan las credenciales
 
         const payload = {
             amount: price,
             currency: 'USD',
-            order_id: cartId,
+            order_id: orderId,
             url_success: '', //ruta del proyecto en caso de que el pago se haya hecho con éxito,
             url_return: '', //volver al sitio web inicial
             url_callback: '' // para la utilización de webhooks
