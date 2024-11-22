@@ -1,5 +1,6 @@
 import { UploadedFile } from "express-fileupload";
 import { ImageUploader, CloudinaryUploadResult } from "../../config/image-uploader.adapter";
+import { CustomError } from "../../domain";
 
 
 
@@ -39,5 +40,25 @@ export class ImageService {
 
         return url;
     }
+
+    async processSingleImage(imageFile: UploadedFile[]): Promise<string | undefined> {
+        if (!imageFile || imageFile.length === 0) {
+            throw CustomError.badRequest('An image file is required');
+        }
+    
+        if (imageFile.length > 1) {
+            throw CustomError.badRequest('A single image should be uploaded');
+        }
+    
+        try {
+            const uploadImagesResult = await this.uploadImages(imageFile);
+            return uploadImagesResult[0]
+                ? this.transformSingleImage(uploadImagesResult[0].public_id)
+                : undefined;
+        } catch (error) {
+            throw CustomError.internalServer('Failed to upload package image');
+        }
+    }
+    
 
 }

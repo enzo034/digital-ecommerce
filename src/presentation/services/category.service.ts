@@ -1,4 +1,4 @@
-import { CategoryModel } from "../../data/mongo";
+import { CategoryDocument, CategoryModel } from "../../data/mongo";
 import { CreateCategoryDto, CustomError, ModifyCategoryDto, DeleteCategoryDto } from "../../domain";
 import { CategoryEntity } from "../../domain/entities/category.entity";
 
@@ -34,28 +34,27 @@ export class CategoryService {
 
     async modifyCategory(modifyCategoryDto: ModifyCategoryDto) {
 
-        const category = await CategoryModel.findById(modifyCategoryDto.id);
-        if (!category) throw CustomError.notFound(`Category with id : ${modifyCategoryDto.id} not found.`);
+        const category = await this.checkIfCategoryExistsById(modifyCategoryDto.id);
 
-        const modifiedCategory = await CategoryModel.findByIdAndUpdate(
-            modifyCategoryDto.id,
-            { name: modifyCategoryDto.name },
-            { new: true }
-        );
+        category.name = modifyCategoryDto.name!;
 
-        if (!modifiedCategory) throw CustomError.notFound(`Unable to update category with id: ${modifyCategoryDto.id}`);
+        await category.save();
 
-        return CategoryEntity.fromObject(modifiedCategory);
+        return CategoryEntity.fromObject(category);
 
     }
 
-    async deleteCategory(deleteCategoryDto: DeleteCategoryDto) {
+    async deleteCategory(deleteCategoryDto: DeleteCategoryDto) { //todo: verificar si se va a utilizar
+        const category = await this.checkIfCategoryExistsById(deleteCategoryDto.id);
+        await category.deleteOne();
+    }
 
-        const category = await CategoryModel.findById(deleteCategoryDto.id);
-        if (!category) throw CustomError.notFound(`Category with id: ${deleteCategoryDto.id} not found.`);
+    async checkIfCategoryExistsById(categoryId: string): Promise<CategoryDocument> {
+        const category = await CategoryModel.findById(categoryId);
+        if (!category) 
+            throw CustomError.notFound(`Category with id: ${categoryId} not found.`);
 
-        await CategoryModel.deleteOne({ _id: deleteCategoryDto.id });
-
+        return category;
     }
 
 }
