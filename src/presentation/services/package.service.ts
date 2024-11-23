@@ -27,30 +27,60 @@ export class PackageService {
     async getPackagesCommon(packageOptions: PackageOptions) {
         const { paginationDto, orderBy, urlParameter = '/', where } = packageOptions;
         const { page, limit } = paginationDto;
-
+    
         try {
-            const total = await PackageModel.countDocuments(where);
-
-            const packageModel = await PackageModel.find(where || {})
-                .select('-sourceFiles')
-                .skip((page - 1) * limit)
-                .limit(limit)
-                .sort(orderBy);
-
-            const packageEntities = packageModel.map(product => PackageEntity.fromObject(product));
-
+            const total = await this.countPackages(where);
+            const packageModel = await this.fetchPackages(where, page, limit, orderBy);
+            const packageEntities = this.parsePackageEntities(packageModel);
+    
             return {
                 page,
                 limit,
                 total,
-                next: (page * limit < total) ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null,
-                prev: (page - 1 > 0) ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null,
+                next: this.getNextPageUrl(page, limit, total, urlParameter),
+                prev: this.getPreviousPageUrl(page, limit, urlParameter),
                 packages: packageEntities,
             };
-
         } catch (error) {
-            throw new Error("Internal server error");
+            throw new Error("Internal server error: " + error);
         }
+    }
+
+
+    async countPackages(where: any): Promise<number> {
+        return await PackageModel.countDocuments(where);
+    }
+
+
+    async fetchPackages(where: any, page: number, limit: number, orderBy: any) {
+        return await PackageModel.find(where || {})
+            .select('-sourceFiles')
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .sort(orderBy);
+    }
+
+
+    parsePackageEntities(packageModel: any[]): PackageEntity[] {
+        return packageModel.reduce((acc: PackageEntity[], product) => {
+            try {
+                const entity = PackageEntity.fromObject(product);
+                acc.push(entity); // Agrega solo los válidos
+            } catch (error) {
+                console.warn(`Error parsing product with ID ${product.id}:`);
+            }
+            return acc;
+        }, []);
+    }
+
+
+    getNextPageUrl(page: number, limit: number, total: number, urlParameter: string): string | null {
+        return page * limit < total ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null;
+    }
+
+
+    getPreviousPageUrl(page: number, limit: number, urlParameter: string): string | null {
+        return page - 1 > 0 ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null;
     }
 
     async createPackage(createPackageDto: CreatePackageDto, imageFile: UploadedFile[]) {
