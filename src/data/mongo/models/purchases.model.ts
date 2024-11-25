@@ -9,15 +9,9 @@ const purchasesSchema = new Schema({
         required: [true, 'UserID is required'],
     },
     packages: [{
-        package: {
-            type: Schema.Types.ObjectId,
-            ref: 'Package',
-            required: [true, 'PackageID is required'],
-        },
-        quantity: {
-            type: Number,
-            default: 1
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Package',
+        required: [true, 'PackageID is required'],
     }],
     date: {
         type: Date,

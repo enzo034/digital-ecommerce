@@ -1,6 +1,7 @@
 import { PaymentAdapter } from "../../config/payment.adapter";
-import { CartDocument, CartModel } from "../../data/mongo";
+import { CartDocument, CartModel, UserModel } from "../../data/mongo";
 import { OrderDocument, OrderModel } from "../../data/mongo/models/order.model";
+import { PurchasesModel } from "../../data/mongo/models/purchases.model";
 import { CustomError } from "../../domain";
 import { CreatePaymentDto } from "../../domain/dtos/payment/create-payment.dto";
 
@@ -11,6 +12,22 @@ interface Order {
     date: Date;
 }
 
+interface WebhookInformation {
+    type: string,
+    uuid: string,
+    order_id: string,
+    amount: string,
+    merchang_amount: string,
+    commission: string,
+    is_final: boolean,
+    status: string,
+    txid: string,
+    currency: string,
+    network: string,
+    payer_currency: string,
+    payer_amount: string,
+    sign: string
+}
 
 export class PaymentService {
 
@@ -30,9 +47,32 @@ export class PaymentService {
 
     }
 
-    async paymentWebhook(orderId: string) {
+    async paymentWebhook(payload: WebhookInformation) {
 
-        //todo
+        if (payload.type !== "payout") throw CustomError.badRequest("Invalid webhook type");
+
+        if (payload.status !== 'paid') {
+            this.manageWebhookStatus(payload.status);
+            return { message: `Webhook processed with status: ${payload.status}` };
+        }
+
+        const order = await OrderModel.findById(payload.order_id);
+        if (!order) throw CustomError.notFound(`Order with id : ${payload.order_id} not found.`);
+
+        const purchases = await PurchasesModel.create({
+            userId: order.user,
+            totaPrice: order.totalPrice,
+            packages: order.packages
+        });
+
+        // Agregar los packages al user
+        await UserModel.findByIdAndUpdate(
+            order.user,
+            { $push: { packages: { $each: order.packages } } }, // Usar $each para evitar conflictos con arrays
+        );
+
+        // Retornar el resultado de la compra
+        return { message: "Purchase created successfully", purchases };
 
     }
 
@@ -63,7 +103,7 @@ export class PaymentService {
                 }
             );
             await order.save({ session });
-            
+
             await cart.updateOne(
                 { packages: [], totalPrice: 0 },
                 { session }
@@ -77,5 +117,21 @@ export class PaymentService {
         } finally {
             session.endSession();
         }
+    }
+
+    manageWebhookStatus(status: string) {
+
+        switch (status) {
+
+            case 'process': throw CustomError.badRequest(`The status is in process.`);
+            case 'check': throw CustomError.badRequest(`The status is in verification.`);
+            case 'fail': throw CustomError.badRequest(`The payout has been failed. Contact support.`); //todo: si el pago is_final == true, simplemente cancelar, si es false, notificar al usuario con el id del payout para que contacte al soporte
+            case 'cancel': throw CustomError.badRequest(`The payout has been canceled.`);
+            case 'system_fail': throw CustomError.badRequest(`System error. Contact Support.`);
+
+            default: throw CustomError.badRequest(`Status : ${status}, is not valid.`);
+
+        }
+
     }
 }
