@@ -1,5 +1,13 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
+interface Purchases {
+    userId: string,
+    packages: string,
+    date: Date,
+    totaPrice: number,
+}
+
+export type PurchasesDocument = Document & Purchases;
 
 const purchasesSchema = new Schema({
 
@@ -33,4 +41,4 @@ purchasesSchema.set('toJSON', {
 });
 
 
-export const PurchasesModel = model('Purchases', purchasesSchema);
+export const PurchasesModel = model<PurchasesDocument>('Purchases', purchasesSchema);

@@ -2,6 +2,7 @@ import {Schema, model, Document} from "mongoose";
 
 interface Category {
     name: string,
+    timesSold: number
 }
 
 export type CategoryDocument = Document & Category;
@@ -14,6 +15,10 @@ const categorySchema = new Schema({
         unique: true,
         lowercase: true,
         trim: true
+    },
+    timesSold: {
+        type: Number,
+        default: 0
     }
 
 });

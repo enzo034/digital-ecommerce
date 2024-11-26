@@ -1,16 +1,10 @@
+import mongoose, { ClientSession } from "mongoose";
 import { PaymentAdapter } from "../../config/payment.adapter";
-import { CartDocument, CartModel, UserModel } from "../../data/mongo";
+import { CartDocument, CartModel, CategoryModel, PackageModel, UserModel } from "../../data/mongo";
 import { OrderDocument, OrderModel } from "../../data/mongo/models/order.model";
-import { PurchasesModel } from "../../data/mongo/models/purchases.model";
+import { PurchasesDocument, PurchasesModel } from "../../data/mongo/models/purchases.model";
 import { CustomError } from "../../domain";
 import { CreatePaymentDto } from "../../domain/dtos/payment/create-payment.dto";
-
-interface Order {
-    user: string;
-    packages: Array<string>;
-    totalPrice: number;
-    date: Date;
-}
 
 interface WebhookInformation {
     type: string,
@@ -33,6 +27,7 @@ export class PaymentService {
 
     constructor() { }
 
+    //#region Create Payment
     async createPayment(createPaymentDto: CreatePaymentDto) {
 
         const { userId } = createPaymentDto;
@@ -44,35 +39,6 @@ export class PaymentService {
         const link = await PaymentAdapter.createPaymentLink(order.totalPrice!, order.id);
 
         return link;
-
-    }
-
-    async paymentWebhook(payload: WebhookInformation) {
-
-        if (payload.type !== "payout") throw CustomError.badRequest("Invalid webhook type");
-
-        if (payload.status !== 'paid') {
-            this.manageWebhookStatus(payload.status);
-            return { message: `Webhook processed with status: ${payload.status}` };
-        }
-
-        const order = await OrderModel.findById(payload.order_id);
-        if (!order) throw CustomError.notFound(`Order with id : ${payload.order_id} not found.`);
-
-        const purchases = await PurchasesModel.create({
-            userId: order.user,
-            totaPrice: order.totalPrice,
-            packages: order.packages
-        });
-
-        // Agregar los packages al user
-        await UserModel.findByIdAndUpdate(
-            order.user,
-            { $push: { packages: { $each: order.packages } } }, // Usar $each para evitar conflictos con arrays
-        );
-
-        // Retornar el resultado de la compra
-        return { message: "Purchase created successfully", purchases };
 
     }
 
@@ -89,7 +55,7 @@ export class PaymentService {
     }
 
     async createUserOrder(cart: CartDocument): Promise<OrderDocument> {
-        const session = await CartModel.startSession();
+        const session = await mongoose.startSession();
         session.startTransaction();
 
         try {
@@ -118,8 +84,24 @@ export class PaymentService {
             session.endSession();
         }
     }
+    
+    //#endregion
 
-    manageWebhookStatus(status: string) {
+    //#region Manage Cryptomus Webhook
+    async paymentWebhook(payload: WebhookInformation): Promise<{ message: string, purchase?: PurchasesDocument }> {
+        if (payload.type !== "payout") throw CustomError.badRequest("Invalid webhook type");
+
+        if (payload.status !== 'paid') {
+            this.manageWebhookStatus(payload.status);
+            return { message: `Webhook processed with status: ${payload.status}` };
+        }
+
+        const purchase = await this.confirmPurchase(payload.order_id);
+
+        return { message: "Purchase created successfully", purchase };
+    }
+
+    manageWebhookStatus(status: string): void {
 
         switch (status) {
 
@@ -134,4 +116,82 @@ export class PaymentService {
         }
 
     }
+
+    async confirmPurchase(orderId: string): Promise<PurchasesDocument> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const order = await OrderModel.findById(orderId).session(session);
+            if (!order) throw CustomError.notFound(`Order with id : ${orderId} not found.`);
+
+            const purchase = await this.createPurchase(order, session);
+
+            await this.updateTimesSold(order, session);
+
+            await this.updateUserPackages(order, session);
+
+            await session.commitTransaction();
+
+            return purchase;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
+    }
+
+    async createPurchase(order: OrderDocument, session: ClientSession): Promise<PurchasesDocument> {
+        try {
+            // Crear la instancia de compra
+            const purchase = new PurchasesModel({
+                userId: order.user,
+                totalPrice: order.totalPrice,
+                packages: order.packages,
+            });
+
+            // Guardar la compra dentro de la sesión de la transacción
+            await purchase.save({ session });
+
+            return purchase;
+        } catch (error) {
+            throw CustomError.internalServer(`Error creating purchase: ${error instanceof Error ? error.message : 'Internal server error.'}`);
+        }
+    }
+
+    async updateTimesSold(order: OrderDocument, session: ClientSession): Promise<void> {
+
+        const packageIds = order.packages;
+
+        for (const pId of packageIds) {
+            const newPackage = await PackageModel.findByIdAndUpdate(
+                pId,
+                { $inc: { timesSold: 1 } },
+                { session, new: true },
+            );
+
+            await CategoryModel.updateMany({ id: newPackage?.categories },
+                { $inc: { timesSold: 1 } },
+                { session }
+            );
+        }
+    }
+
+
+    async updateUserPackages(order: OrderDocument, session: ClientSession) {
+        try {
+            // Actualizar los paquetes del usuario
+            await UserModel.findByIdAndUpdate(
+                order.user,
+                { $push: { packages: { $each: order.packages } } }, // Usar $each para evitar conflictos con arrays
+                { session }
+            );
+        } catch (error) {
+            throw CustomError.internalServer(`Error updating user packages: ${error instanceof Error ? error.message : 'Internal server error.'}`);
+        }
+    }
+
+    //#endregion
+    
 }

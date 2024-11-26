@@ -53,7 +53,7 @@ export class PackageController {
     }
 
 
-    private handleGetPackages(req: Request, res: Response, additionalWhere: Record<string, any>, urlParameter: string) {
+    private handleGetPackages(req: Request, res: Response, additionalWhere: Record<string, any>, urlParameter: string, isAdmin: boolean = false) {
         const [error, paginationDto, orderByParams, priceWhere] = this.getQueryParams(req);
         if (error) return res.status(400).json({ error });
 
@@ -68,6 +68,7 @@ export class PackageController {
             urlParameter: urlParameter,
             where: where,
             orderBy: orderByParams, // Mongoose lo acepta como [string, number][]
+            isAdmin
         })
             .then(packages => res.status(200).json({ packages }))
             .catch(error => handleError(res, error));
@@ -86,6 +87,22 @@ export class PackageController {
         const { word } = req.params;
         this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`);
     }
+
+    getAdminPackages = (req: Request, res: Response) => {
+        this.handleGetPackages(req, res, {}, '/', true);
+    };
+    
+    //todo: crear controlador para los packages de los usuarios con el filtro : _id: { $in: objectIds }
+
+    getAdminPackagesByCategory = (req: Request, res: Response) => {
+        const { categoryId } = req.params;
+        this.handleGetPackages(req, res, { categories: { $in: [categoryId] } }, `/category/${categoryId}`, true);
+    };
+    
+    getAdminPackagesByWord = (req: Request, res: Response) => {
+        const { word } = req.params;
+        this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`, true);
+    };
 
     createPackage = (req: Request, res: Response) => {
         const [error, createPackageDto] = CreatePackageDto.create(req.body);

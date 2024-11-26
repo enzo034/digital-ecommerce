@@ -24,6 +24,10 @@ export class PackageRoutes {
         router.get('/category/:categoryId', controller.getPackagesByCategory);
         router.get('/word/:word', controller.getPackagesByWord);
 
+        router.get('/admin/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getAdminPackages);
+        router.get('/admin/category/:categoryId', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getAdminPackagesByCategory);
+        router.get('/admin/word/:word', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getAdminPackagesByWord);
+
         router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin, FileTypeMiddleware.validateExtension], controller.createPackage);
 
         router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyPackage);

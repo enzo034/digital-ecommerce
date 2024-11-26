@@ -14,6 +14,7 @@ export interface PackageOptions {
     urlParameter?: string;
     where?: Record<string, any>; // Definición de where mongoose
     orderBy?: { [key: string]: SortOrder } | [string, SortOrder][]; // Definición de order by mongoose
+    isAdmin?: boolean;
 }
 
 
@@ -25,12 +26,12 @@ export class PackageService {
     ) { }
 
     async getPackagesCommon(packageOptions: PackageOptions) {
-        const { paginationDto, orderBy, urlParameter = '/', where } = packageOptions;
+        const { paginationDto, orderBy, urlParameter = '/', where, isAdmin = false } = packageOptions;
         const { page, limit } = paginationDto;
     
         try {
             const total = await this.countPackages(where);
-            const packageModel = await this.fetchPackages(where, page, limit, orderBy);
+            const packageModel = await this.fetchPackages(where, page, limit, orderBy, isAdmin);
             const packageEntities = this.parsePackageEntities(packageModel);
     
             return {
@@ -51,15 +52,16 @@ export class PackageService {
         return await PackageModel.countDocuments(where);
     }
 
+    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false) { //todo: hacer el endpoint para el admin, y hacer que los que hayan comprado el package, tambien puedan ver el contenido
 
-    async fetchPackages(where: any, page: number, limit: number, orderBy: any) {
-        return await PackageModel.find(where || {})
-            .select('-sourceFiles')
+        const sendSourceFiles = isAdmin ? '' : '-sourceFiles';
+
+        return await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
+            .select(sendSourceFiles)
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy);
     }
-
 
     parsePackageEntities(packageModel: any[]): PackageEntity[] {
         return packageModel.reduce((acc: PackageEntity[], product) => {
@@ -73,11 +75,9 @@ export class PackageService {
         }, []);
     }
 
-
     getNextPageUrl(page: number, limit: number, total: number, urlParameter: string): string | null {
         return page * limit < total ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null;
     }
-
 
     getPreviousPageUrl(page: number, limit: number, urlParameter: string): string | null {
         return page - 1 > 0 ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null;

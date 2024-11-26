@@ -25,7 +25,11 @@ const packageSchema = new Schema({
     categories: [{
         type: Schema.Types.ObjectId,
         ref: 'Category'
-    }]
+    }],
+    timesSold: {
+        type: Number,
+        default: 0
+    }
 
 });
 
