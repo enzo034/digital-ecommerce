@@ -91,18 +91,24 @@ export class PackageController {
     getAdminPackages = (req: Request, res: Response) => {
         this.handleGetPackages(req, res, {}, '/', true);
     };
-    
-    //todo: crear controlador para los packages de los usuarios con el filtro : _id: { $in: objectIds }
 
     getAdminPackagesByCategory = (req: Request, res: Response) => {
         const { categoryId } = req.params;
         this.handleGetPackages(req, res, { categories: { $in: [categoryId] } }, `/category/${categoryId}`, true);
     };
-    
+
     getAdminPackagesByWord = (req: Request, res: Response) => {
         const { word } = req.params;
         this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`, true);
     };
+
+    getPurchasedPackages = (req: Request, res: Response) => {
+        const { packages } = req.body.user;
+        
+        if (!packages || packages.length === 0) return res.status(400).json({ error: 'No packages purchased.' });
+
+        this.handleGetPackages(req, res, { _id: { $in: packages } }, `/purchased-packages`, true);
+    }
 
     createPackage = (req: Request, res: Response) => {
         const [error, createPackageDto] = CreatePackageDto.create(req.body);

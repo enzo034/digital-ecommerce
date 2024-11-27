@@ -28,6 +28,8 @@ export class PackageRoutes {
         router.get('/admin/category/:categoryId', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getAdminPackagesByCategory);
         router.get('/admin/word/:word', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getAdminPackagesByWord);
 
+        router.get('/purchased-packages', [AuthMiddleware.validateJWT], controller.getPurchasedPackages);
+
         router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin, FileTypeMiddleware.validateExtension], controller.createPackage);
 
         router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyPackage);
