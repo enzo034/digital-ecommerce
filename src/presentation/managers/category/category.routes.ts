@@ -19,11 +19,15 @@ export class CategoryRoutes {
         const controller = new CategoryController(categoryService);
 
         // Definir las rutas
-        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.createCategory);
+        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.createCategory);
+
         router.get('/', controller.getCategories);
-        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.modifyCategory);
-        router.delete('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.deleteCategory);
-        
+        router.get('/popular-categories', controller.getPopularCategories);
+
+        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyCategory);
+
+        router.delete('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.deleteCategory);
+
 
         return router;
     }

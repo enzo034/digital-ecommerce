@@ -15,20 +15,24 @@ export class CategoryController {
     createCategory = (req: Request, res: Response) => {
         const [error, createCategoryDto] = CreateCategoryDto.create(req.body);
         if (error) return res.status(400).json({ error });
-    
+
         this.categoryService.createCategory(createCategoryDto!)
             .then(category => res.status(201).json(category))
             .catch(error => handleError(res, error));
     };
 
     getCategories = (req: Request, res: Response) => {
-
         this.categoryService.getCategories()
             .then(categories => res.json({ categories }))
             .catch(error => handleError(res, error));
-
     };
-    
+
+    getPopularCategories = (req: Request, res: Response) => {
+        this.categoryService.getPopularCategories()
+            .then(categories => res.json({ categories }))
+            .catch(error => handleError(res, error));
+    }
+
     modifyCategory = (req: Request, res: Response) => {
 
         const [error, modifyCategoryDto] = ModifyCategoryDto.create(req.body);

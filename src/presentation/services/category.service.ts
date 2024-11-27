@@ -13,23 +13,30 @@ export class CategoryService {
 
 
     async createCategory(createCategoryDto: CreateCategoryDto) {
-
         const categoryExists = await CategoryModel.findOne({ name: createCategoryDto.name })
         if (categoryExists) throw CustomError.badRequest('Category already exists');
 
         const category = await CategoryModel.create(createCategoryDto);
 
         return CategoryEntity.fromObject(category);
-
     }
 
     async getCategories() {
-
         const categories = await CategoryModel.find();
         if (!categories.length) throw CustomError.notFound('No categories found.');
 
         return categories.map(category => CategoryEntity.fromObject(category)); // Se retornan las entidades de las categorias.
+    }
 
+    async getPopularCategories() {
+        const categories = await CategoryModel.find()
+            .sort({ timesSold: -1 })
+            .limit(6)
+            .select('name timesSold');
+
+        if (!categories.length) throw CustomError.notFound('No categories found.');
+        
+        return categories.map(category => CategoryEntity.fromObject(category));
     }
 
     async modifyCategory(modifyCategoryDto: ModifyCategoryDto) {
@@ -51,7 +58,7 @@ export class CategoryService {
 
     async checkIfCategoryExistsById(categoryId: string): Promise<CategoryDocument> {
         const category = await CategoryModel.findById(categoryId);
-        if (!category) 
+        if (!category)
             throw CustomError.notFound(`Category with id: ${categoryId} not found.`);
 
         return category;
