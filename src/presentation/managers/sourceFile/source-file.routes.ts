@@ -19,11 +19,11 @@ export class SourceFileRoutes {
         const controller = new SourceFileController(sourceFileService);
 
         // Definir las rutas
-        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.createSourceFile);
-        router.get('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.getSourceFiles);
-        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifySourceFile);
-        router.delete('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.deleteSourceFile);
-
+        router.post('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.createSourceFile);
+        router.get('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin],controller.getSourceFiles);
+        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.modifySourceFile);
+        router.delete('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin] ,controller.deleteSourceFile);
+        
 
         return router;
     }

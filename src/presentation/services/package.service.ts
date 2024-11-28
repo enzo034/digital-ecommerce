@@ -25,15 +25,16 @@ export class PackageService {
         private readonly imageService: ImageService,
     ) { }
 
+    //#region Get packages
     async getPackagesCommon(packageOptions: PackageOptions) {
         const { paginationDto, orderBy, urlParameter = '/', where, isAdmin = false } = packageOptions;
         const { page, limit } = paginationDto;
-    
+
         try {
             const total = await this.countPackages(where);
             const packageModel = await this.fetchPackages(where, page, limit, orderBy, isAdmin);
             const packageEntities = this.parsePackageEntities(packageModel);
-    
+
             return {
                 page,
                 limit,
@@ -43,18 +44,17 @@ export class PackageService {
                 packages: packageEntities,
             };
         } catch (error) {
-            throw new Error("Internal server error: " + error);
+            throw CustomError.internalServer("Internal server error: " + error);
         }
     }
-
 
     async countPackages(where: any): Promise<number> {
         return await PackageModel.countDocuments(where);
     }
 
-    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false) { //todo: hacer el endpoint para el admin, y hacer que los que hayan comprado el package, tambien puedan ver el contenido
+    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false) {
 
-        const sendSourceFiles = isAdmin ? '' : '-sourceFiles';
+        const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
 
         return await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
@@ -82,7 +82,30 @@ export class PackageService {
     getPreviousPageUrl(page: number, limit: number, urlParameter: string): string | null {
         return page - 1 > 0 ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null;
     }
+    //#endregion
 
+    //#region Get package by id
+
+    async getPackageById(id: string, isAdmin: boolean = false): Promise<PackageEntity> {
+
+        const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
+
+        const pkg = await PackageModel.findById(id)
+            .select(sendSourceFiles)
+
+        if(!pkg) throw CustomError.notFound(`The package with id ${id} was not found.`)
+
+        return PackageEntity.fromObject(pkg);
+
+    }
+
+    shouldSendSourceFiles(isAdmin: boolean): string {
+        return isAdmin ? '' : '-sourceFiles';
+    }
+
+    //#endregion
+
+    //#region Create Package
     async createPackage(createPackageDto: CreatePackageDto, imageFile: UploadedFile[]) {
 
         const existingPackage = await PackageModel.findOne({ name: createPackageDto.name });
@@ -104,7 +127,9 @@ export class PackageService {
         return PackageEntity.fromObject(newPackage);
 
     }
+    //#endregion
 
+    //#region ModifyPackage
     async modifyPackage(modifyPackageDto: ModifyPackageDto) {
 
         const packageModel = await PackageModel.findById(modifyPackageDto.id);
@@ -125,5 +150,6 @@ export class PackageService {
         }
 
     }
+    //#endregion
 
 }
