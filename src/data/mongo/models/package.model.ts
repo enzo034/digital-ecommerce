@@ -1,5 +1,16 @@
-import {Schema, model} from "mongoose";
+import {Document, Schema, model} from "mongoose";
 
+interface Package {
+    name: string;
+    previewImage: string;
+    description: string;
+    price: number;
+    sourceFiles: string[]; // Referencias a ObjectIds de SourceFile
+    categories: string[]; // Referencias a ObjectIds de Category
+    timesSold: number;
+}
+
+export type PackageDocument = Document & Package;
 
 const packageSchema = new Schema({
 
@@ -41,4 +52,4 @@ packageSchema.set('toJSON', {
     },
 });
 
-export const PackageModel = model('Package', packageSchema);
+export const PackageModel = model<PackageDocument>('Package', packageSchema);

@@ -19,7 +19,8 @@ export class PackageEntity {
 
     ) { }
 
-    static fromObject(object: { [key: string]: any }): PackageEntity {
+
+    static fromObject(object: { [key: string]: any; }): PackageEntity {
 
         const { id, name, previewImage, description, price, sourceFiles, categories } = object;
 
@@ -34,7 +35,7 @@ export class PackageEntity {
 
         if (!price) throw CustomError.badRequest('Missing price');
 
-        if(sourceFiles) {
+        if (sourceFiles) {
             if (!Array.isArray(sourceFiles)) throw CustomError.badRequest('SourceFiles should be an array');
         }
 

@@ -1,11 +1,13 @@
 import { UploadedFile } from "express-fileupload";
-import { PackageModel } from "../../data/mongo";
+import { PackageDocument, PackageModel } from "../../data/mongo";
 import { CustomError } from "../../domain";
 import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
 import { ModifyPackageDto } from "../../domain/dtos/package/modify-package.dto";
 import { PaginationDto } from "../../domain/dtos/package/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
 import { ImageService } from "./image.service";
+import { countDocuments, getNextPageUrl, getPreviousPageUrl } from "../../config/pagination-helper";
+import { parseEntities } from "../../domain/entities/IEntity";
 
 type SortOrder = 1 | -1;
 
@@ -27,20 +29,20 @@ export class PackageService {
 
     //#region Get packages
     async getPackagesCommon(packageOptions: PackageOptions) {
-        const { paginationDto, orderBy, urlParameter = '/', where, isAdmin = false } = packageOptions;
+        const { paginationDto, orderBy, urlParameter = '/', where = {}, isAdmin = false } = packageOptions;
         const { page, limit } = paginationDto;
 
         try {
-            const total = await this.countPackages(where);
+            const total = await countDocuments(PackageModel, where);
             const packageModel = await this.fetchPackages(where, page, limit, orderBy, isAdmin);
-            const packageEntities = this.parsePackageEntities(packageModel);
+            const packageEntities = parseEntities(PackageEntity, packageModel);
 
             return {
                 page,
                 limit,
                 total,
-                next: this.getNextPageUrl(page, limit, total, urlParameter),
-                prev: this.getPreviousPageUrl(page, limit, urlParameter),
+                next: getNextPageUrl(page, limit, total, urlParameter),
+                prev: getPreviousPageUrl(page, limit, urlParameter),
                 packages: packageEntities,
             };
         } catch (error) {
@@ -48,40 +50,19 @@ export class PackageService {
         }
     }
 
-    async countPackages(where: any): Promise<number> {
-        return await PackageModel.countDocuments(where);
-    }
-
-    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false) {
+    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> {
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
 
-        return await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
+        const packages = await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy);
+
+        return packages;
     }
 
-    parsePackageEntities(packageModel: any[]): PackageEntity[] {
-        return packageModel.reduce((acc: PackageEntity[], product) => {
-            try {
-                const entity = PackageEntity.fromObject(product);
-                acc.push(entity); // Agrega solo los válidos
-            } catch (error) {
-                console.warn(`Error parsing product with ID ${product.id}:`);
-            }
-            return acc;
-        }, []);
-    }
-
-    getNextPageUrl(page: number, limit: number, total: number, urlParameter: string): string | null {
-        return page * limit < total ? `/api/package${urlParameter}?page=${page + 1}&limit=${limit}` : null;
-    }
-
-    getPreviousPageUrl(page: number, limit: number, urlParameter: string): string | null {
-        return page - 1 > 0 ? `/api/package${urlParameter}?page=${page - 1}&limit=${limit}` : null;
-    }
     //#endregion
 
     //#region Get package by id
@@ -93,7 +74,7 @@ export class PackageService {
         const pkg = await PackageModel.findById(id)
             .select(sendSourceFiles)
 
-        if(!pkg) throw CustomError.notFound(`The package with id ${id} was not found.`)
+        if (!pkg) throw CustomError.notFound(`The package with id ${id} was not found.`)
 
         return PackageEntity.fromObject(pkg);
 
@@ -153,3 +134,4 @@ export class PackageService {
     //#endregion
 
 }
+

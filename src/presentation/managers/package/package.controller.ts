@@ -5,6 +5,7 @@ import { CreatePackageDto } from "../../../domain/dtos/package/create-package.dt
 import { PaginationDto } from "../../../domain/dtos/package/pagination.dto";
 import { ModifyPackageDto } from "../../../domain/dtos/package/modify-package.dto";
 import { isMongoId } from "../../../config";
+import { EcommerceQueryService, HandleGetEntities } from "../../services/ecommerce-query.service";
 
 type SortOrder = 1 | -1;
 
@@ -20,43 +21,17 @@ export class PackageController {
 
     //DI
     constructor(
-        private readonly packageService: PackageService
+        private readonly packageService: PackageService,
+        private readonly ecommerceQueryService: EcommerceQueryService
     ) { }
 
     //#region Methods to help get controllers
-    // Función para parsear el parámetro orderBy en un solo objeto
-    private parseOrderBy(orderByQuery: string): [string, SortOrder][] {
-        return orderByQuery.split(',').reduce((acc, param) => {
-            const [field, order] = param.split(':');
-            acc.push([field, order === 'desc' ? -1 : 1]);
-            return acc;
-        }, [] as [string, SortOrder][]);
-    }
 
-    // Función para obtener los parámetros de consulta de la req
-    private getQueryParams(req: Request): [null | string, PaginationDto | null, [string, SortOrder][], Record<string, any>] {
-        const { page = 1, limit = 10, orderBy, minPrice, maxPrice } = req.query as QueryParams;
-        const [error, paginationDto] = PaginationDto.create(+page, +limit);
-        if (error) return [error, null, [], {}];
+    private handleGetPackages(handleGetPackages: HandleGetEntities) {
 
-        let orderByParams: [string, SortOrder][] = [];
-        if (orderBy) {
-            orderByParams = this.parseOrderBy(orderBy); // Esto ahora devuelve un arreglo de tuplas
-        }
+        const {req, res, additionalWhere, urlParameter, isAdmin} = handleGetPackages;
 
-        let where: Record<string, any> = {};
-        if (minPrice || maxPrice) {
-            where.price = {};
-            if (minPrice) where.price.$gte = +minPrice;
-            if (maxPrice) where.price.$lte = +maxPrice;
-        }
-
-        return [null, paginationDto!, orderByParams, where];
-    }
-
-
-    private handleGetPackages(req: Request, res: Response, additionalWhere: Record<string, any>, urlParameter: string, isAdmin: boolean = false) {
-        const [error, paginationDto, orderByParams, priceWhere] = this.getQueryParams(req);
+        const [error, paginationDto, orderByParams, priceWhere] = this.ecommerceQueryService.getQueryParams(req);
         if (error) return res.status(400).json({ error });
 
         const where = {
@@ -79,31 +54,31 @@ export class PackageController {
 
     //#region Get Controllers
     getPackages = (req: Request, res: Response) => {
-        this.handleGetPackages(req, res, {}, '/');
+        this.handleGetPackages({req, res, additionalWhere: {}, urlParameter: ''});
     }
 
     getPackagesByCategory = (req: Request, res: Response) => {
         const { categoryId } = req.params;
-        this.handleGetPackages(req, res, { categories: { $in: [categoryId] } }, `/category/${categoryId}`);
+        this.handleGetPackages({req, res, additionalWhere: { categories: { $in: [categoryId] } }, urlParameter: `/category/${categoryId}`});
     }
 
     getPackagesByWord = (req: Request, res: Response) => {
         const { word } = req.params;
-        this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`);
+        this.handleGetPackages({req, res, additionalWhere: { name: { $regex: word, $options: 'i' } }, urlParameter: `/word/${word}`});
     }
 
     getAdminPackages = (req: Request, res: Response) => {
-        this.handleGetPackages(req, res, {}, '/', true);
+        this.handleGetPackages({req, res, additionalWhere: {}, urlParameter: '/', isAdmin: true});
     };
 
     getAdminPackagesByCategory = (req: Request, res: Response) => {
         const { categoryId } = req.params;
-        this.handleGetPackages(req, res, { categories: { $in: [categoryId] } }, `/category/${categoryId}`, true);
+        this.handleGetPackages({req, res, additionalWhere: { categories: { $in: [categoryId] } }, urlParameter: `/category/${categoryId}`, isAdmin: true});
     };
 
     getAdminPackagesByWord = (req: Request, res: Response) => {
         const { word } = req.params;
-        this.handleGetPackages(req, res, { name: { $regex: word, $options: 'i' } }, `/word/${word}`, true);
+        this.handleGetPackages({req, res, additionalWhere: { name: { $regex: word, $options: 'i' } }, urlParameter: `/word/${word}`, isAdmin: true});
     };
 
     getPurchasedPackages = (req: Request, res: Response) => {
@@ -111,7 +86,7 @@ export class PackageController {
 
         if (!packages || packages.length === 0) return res.status(400).json({ error: 'No packages purchased.' });
 
-        this.handleGetPackages(req, res, { _id: { $in: packages } }, `/purchased-packages`, true);
+        this.handleGetPackages({req, res, additionalWhere: { _id: { $in: packages } }, urlParameter: `/purchased-packages`, isAdmin: true});
     }
 
     getPackageById = (req: Request, res: Response) => {

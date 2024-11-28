@@ -4,6 +4,7 @@ import { PackageController } from './package.controller';
 import { PackageService } from '../../services/package.service';
 import { ImageService } from '../../services/image.service';
 import { FileTypeMiddleware } from '../../middlewares/file-upload.middleware';
+import { EcommerceQueryService } from '../../services/ecommerce-query.service';
 
 
 
@@ -15,9 +16,11 @@ export class PackageRoutes {
         const router = Router();
 
         const imageService = new ImageService();
+        
         const packageService = new PackageService(imageService);
-
-        const controller = new PackageController(packageService);
+        const ecommerceQueryService = new EcommerceQueryService();
+        
+        const controller = new PackageController(packageService, ecommerceQueryService);
 
         // Definir las rutas
         router.get('/', [AuthMiddleware.validateJWT], controller.getPackages);
