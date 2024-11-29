@@ -5,13 +5,13 @@ export interface IEntity<T> {
     fromObject(object: { [key: string]: any }): T;
 }
 
-export function parseEntities<T>(EntityClass: IEntity<T>, packageModel: Document[]): T[] {
-    return packageModel.reduce((acc: T[], product) => {
+export function parseEntities<T>(EntityClass: IEntity<T>, documents: Document[]): T[] {
+    return documents.reduce((acc: T[], document) => {
         try {
-            const entity = EntityClass.fromObject(product);
+            const entity = EntityClass.fromObject(document);
             acc.push(entity); // Agrega solo los válidos
         } catch (error) {
-            console.warn(`Error parsing product with ID ${product.id}:`);
+            console.warn(`Error parsing document with ID ${document.id}:`);
         }
         return acc;
     }, []);

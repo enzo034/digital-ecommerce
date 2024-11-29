@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
-import { PaginationDto } from "../../domain/dtos/package/pagination.dto";
+import { PaginationDto } from "../../domain/dtos/shared/pagination.dto";
 import { handleError } from "../../config/handle-error";
+import { PackageOptions } from "./package.service";
+import { countDocuments, getNextPageUrl, getPreviousPageUrl } from "../../config/pagination-helper";
+import { PackageModel } from "../../data/mongo";
+import { Model } from "mongoose";
+import { parseEntities } from "../../domain/entities/Ientity";
 
 
 type SortOrder = 1 | -1;
@@ -54,6 +59,32 @@ export class EcommerceQueryService {
         return [null, paginationDto!, orderByParams, where];
     }
 
+    async getResourcesCommon<T>(
+        model: Model<T>,
+        entity: any,
+        fetchFunction: (...args: any[]) => Promise<any[]>,// Tipo de fetchFunctions para que reciba cualquier parametro
+        options: PackageOptions
+    ) {
+        // Extraemos los valores necesarios de `options`
+        const { paginationDto, orderBy, urlParameter = '/', where = {}, isAdmin = false } = options;
+        const { page, limit } = paginationDto;
+    
+        const total = await countDocuments(model, where);
+
+        // Llamamos a `fetchFunction` pasando los argumentos correctos
+        const results = await fetchFunction(where, page, limit, orderBy, isAdmin);
+
+        const parsedResults = parseEntities(entity, results);
+
+        return {
+            page,
+            limit,
+            total,
+            next: getNextPageUrl(page, limit, total, urlParameter),
+            prev: getPreviousPageUrl(page, limit, urlParameter),
+            results: parsedResults,
+        };
+    }
     
 
 }

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { handleError } from "../../../config/handle-error";
 import { PackageService } from "../../services/package.service";
 import { CreatePackageDto } from "../../../domain/dtos/package/create-package.dto";
-import { PaginationDto } from "../../../domain/dtos/package/pagination.dto";
+import { PaginationDto } from "../../../domain/dtos/shared/pagination.dto";
 import { ModifyPackageDto } from "../../../domain/dtos/package/modify-package.dto";
 import { isMongoId } from "../../../config";
 import { EcommerceQueryService, HandleGetEntities } from "../../services/ecommerce-query.service";
@@ -40,7 +40,7 @@ export class PackageController {
         };
 
         // Asegurándote de que orderByParams es en el formato correcto [campo, orden]
-        this.packageService.getPackagesCommon({
+        this.packageService.getPackagesCommonTest({
             paginationDto: paginationDto!,
             urlParameter: urlParameter,
             where: where,

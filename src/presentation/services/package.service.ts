@@ -3,11 +3,13 @@ import { PackageDocument, PackageModel } from "../../data/mongo";
 import { CustomError } from "../../domain";
 import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
 import { ModifyPackageDto } from "../../domain/dtos/package/modify-package.dto";
-import { PaginationDto } from "../../domain/dtos/package/pagination.dto";
+import { PaginationDto } from "../../domain/dtos/shared/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
 import { ImageService } from "./image.service";
 import { countDocuments, getNextPageUrl, getPreviousPageUrl } from "../../config/pagination-helper";
-import { parseEntities } from "../../domain/entities/IEntity";
+import { parseEntities } from "../../domain/entities/Ientity";
+import { EcommerceQueryService } from "./ecommerce-query.service";
+import { Model } from "mongoose";
 
 type SortOrder = 1 | -1;
 
@@ -25,6 +27,7 @@ export class PackageService {
 
     constructor(
         private readonly imageService: ImageService,
+        private readonly ecommerceQueryService: EcommerceQueryService
     ) { }
 
     //#region Get packages
@@ -49,6 +52,12 @@ export class PackageService {
             throw CustomError.internalServer("Internal server error: " + error);
         }
     }
+
+    async getPackagesCommonTest(packageOptions: PackageOptions) {
+        // Aquí pasamos `fetchPackages` con el contexto correcto
+        return await this.ecommerceQueryService.getResourcesCommon<PackageDocument>(PackageModel, PackageEntity,this.fetchPackages.bind(this), packageOptions);
+    }
+
 
     async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> {
 
