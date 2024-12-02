@@ -31,29 +31,8 @@ export class PackageService {
     ) { }
 
     //#region Get packages
+
     async getPackagesCommon(packageOptions: PackageOptions) {
-        const { paginationDto, orderBy, urlParameter = '/', where = {}, isAdmin = false } = packageOptions;
-        const { page, limit } = paginationDto;
-
-        try {
-            const total = await countDocuments(PackageModel, where);
-            const packageModel = await this.fetchPackages(where, page, limit, orderBy, isAdmin);
-            const packageEntities = parseEntities(PackageEntity, packageModel);
-
-            return {
-                page,
-                limit,
-                total,
-                next: getNextPageUrl(page, limit, total, urlParameter),
-                prev: getPreviousPageUrl(page, limit, urlParameter),
-                packages: packageEntities,
-            };
-        } catch (error) {
-            throw CustomError.internalServer("Internal server error: " + error);
-        }
-    }
-
-    async getPackagesCommonTest(packageOptions: PackageOptions) {
         // Aquí pasamos `fetchPackages` con el contexto correcto
         return await this.ecommerceQueryService.getResourcesCommon<PackageDocument>(PackageModel, PackageEntity,this.fetchPackages.bind(this), packageOptions);
     }

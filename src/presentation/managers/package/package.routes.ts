@@ -16,9 +16,9 @@ export class PackageRoutes {
         const router = Router();
 
         const imageService = new ImageService();
-        
-        const packageService = new PackageService(imageService);
         const ecommerceQueryService = new EcommerceQueryService();
+        
+        const packageService = new PackageService(imageService, ecommerceQueryService);
         
         const controller = new PackageController(packageService, ecommerceQueryService);
 

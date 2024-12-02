@@ -40,7 +40,7 @@ export class PackageController {
         };
 
         // Asegurándote de que orderByParams es en el formato correcto [campo, orden]
-        this.packageService.getPackagesCommonTest({
+        this.packageService.getPackagesCommon({
             paginationDto: paginationDto!,
             urlParameter: urlParameter,
             where: where,
