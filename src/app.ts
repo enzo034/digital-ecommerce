@@ -19,7 +19,6 @@ async function main() {
   const server = new Server({
     port: envs.PORT,
     routes: AppRoutes.routes,
-    public_path: "../public"
   });
 
   server.start();
