@@ -1,8 +1,10 @@
-import { Application } from "express";
-import path from "path";
+import express, { Application } from "express";
 import swaggerJSDoc, { SwaggerDefinition } from "swagger-jsdoc";
 import swaggerUi, { SwaggerOptions } from "swagger-ui-express";
+import path from "path";
 import { envs } from "./envs";
+import { fileURLToPath } from "url";
+
 
 // Configuración básica de Swagger
 const swaggerDefinition: SwaggerDefinition = {
@@ -44,5 +46,16 @@ const options: SwaggerOptions = {
 const swaggerSpec = swaggerJSDoc(options);
 
 export default (app: Application) => {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  const swaggerStaticPath = path.join(
+    __dirname,
+    "node_modules",
+    "swagger-ui-dist"
+  );
+
+  app.use(
+    "/api-docs",
+    express.static(swaggerStaticPath, { index: false }),
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+  );
 };
