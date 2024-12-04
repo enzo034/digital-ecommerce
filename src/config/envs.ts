@@ -8,6 +8,8 @@ export const envs = {
 
   JWT_SEED: get('JWT_SEED').required().asString(),
 
+  NODE_ENV: get('NODE_ENV').required().asString(),
+
   WEB_URL: get('WEB_URL').required().asUrlString(),
 
   SEND_EMAIL: get('SEND_EMAIL').required().asBool(),
