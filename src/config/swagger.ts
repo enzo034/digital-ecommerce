@@ -6,28 +6,28 @@ import { envs } from "./envs";
 
 // Configuración básica de Swagger
 const swaggerDefinition: SwaggerDefinition = {
-  openapi: "3.0.0",
+  openapi: '3.0.0',
   info: {
-    title: "E-Commerce API",
-    version: "1.0.0",
-    description: "API para la gestión de una plataforma de comercio electrónico digital",
+    title: 'E-Commerce API',
+    version: '1.0.0',
+    description: 'API para la gestión de una plataforma de comercio electrónico digital',
   },
   servers: [
     {
-      url: "http://localhost:3000",
-      description: "Servidor Local",
+      url: process.env.NODE_ENV === 'production'
+        ? 'https://www.naumowf.com/'
+        : 'http://localhost:3000',
+      description: process.env.NODE_ENV === 'production'
+        ? 'Servidor de Producción'
+        : 'Servidor Local',
     },
-    {
-      url: "https://www.naumowf.com/",
-      description: "Servidor de producción"
-    }
   ],
 };
 
+
 const routeExtension = envs.NODE_ENV === "production" ? "js" : "ts";
 const routePath = path.join(__dirname, `../presentation/managers/**/*.routes.${routeExtension}`);
-
-
+console.log(routePath);
 // Opciones para swagger-jsdoc
 const options: SwaggerOptions = {
   swaggerDefinition,
