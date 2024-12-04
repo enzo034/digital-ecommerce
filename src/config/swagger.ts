@@ -26,15 +26,19 @@ const swaggerDefinition: SwaggerDefinition = {
 
 
 const routeExtension = envs.NODE_ENV === "production" ? "js" : "ts";
-const routePath = path.join(__dirname, `../presentation/managers/**/*.routes.${routeExtension}`);
-console.log(routePath);
+const routePath = path.resolve(
+  process.cwd(),
+  `dist/presentation/managers/**/*.routes.${routeExtension}`
+);
+
+console.log("Swagger busca en:", routePath);
+
 // Opciones para swagger-jsdoc
 const options: SwaggerOptions = {
   swaggerDefinition,
   apis: [
     routePath
   ],
-
 };
 
 const swaggerSpec = swaggerJSDoc(options);
