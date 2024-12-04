@@ -10,6 +10,8 @@ export const envs = {
 
   NODE_ENV: get('NODE_ENV').required().asString(),
 
+  MY_APP_ENV: get("MY_APP_ENV").required().asString(),
+
   WEB_URL: get('WEB_URL').required().asUrlString(),
 
   SEND_EMAIL: get('SEND_EMAIL').required().asBool(),

@@ -27,7 +27,8 @@ const swaggerDefinition: SwaggerDefinition = {
 };
 
 
-const routeExtension = envs.NODE_ENV === "production" ? "js" : "ts";
+const routeExtension = envs.MY_APP_ENV === "production" ? "js" : "ts";
+
 const routePath = path.resolve(
   process.cwd(),
   `dist/presentation/managers/**/*.routes.${routeExtension}`
