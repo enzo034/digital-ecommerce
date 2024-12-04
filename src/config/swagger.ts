@@ -16,6 +16,10 @@ const swaggerDefinition: SwaggerDefinition = {
       url: "http://localhost:3000",
       description: "Servidor Local",
     },
+    {
+      url: "https://www.naumowf.com/",
+      description: "Servidor Produccion",
+    },
   ],
 };
 
