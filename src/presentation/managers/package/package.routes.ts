@@ -394,13 +394,13 @@ export class PackageRoutes {
          *     tags: 
          *       - Packages
          *     summary: Modify an existing package
-         *     description: Modify the details of an existing package by providing updated information.
+         *     description: Modify the details of an existing package by providing updated information. This includes updating basic information or replacing the preview image. Requires admin privileges.
          *     security:
          *       - BearerAuth: []
          *     requestBody:
          *       required: true
          *       content:
-         *         application/json:
+         *         multipart/form-data:
          *           schema:
          *             type: object
          *             required:
@@ -408,26 +408,36 @@ export class PackageRoutes {
          *             properties:
          *               id:
          *                 type: string
+         *                 description: The unique identifier of the package to modify.
          *                 example: "64f1e2dcb7a6c9c73f9e1234"
          *               name:
          *                 type: string
+         *                 description: The updated name of the package.
          *                 example: "Premium Package"
          *               description:
          *                 type: string
+         *                 description: A brief description of the package.
          *                 example: "This package includes exclusive features."
          *               price:
          *                 type: number
+         *                 description: The updated price of the package.
          *                 example: 29.99
          *               sourceFiles:
          *                 type: array
+         *                 description: Array of updated source file IDs associated with the package.
          *                 items:
          *                   type: string
          *                   example: "SourceFile ID"
          *               categories:
          *                 type: array
+         *                 description: Array of updated category IDs associated with the package.
          *                 items:
          *                   type: string
          *                   example: "Category ID"
+         *               previewImage:
+         *                 type: string
+         *                 format: binary
+         *                 description: The updated preview image file for the package.
          *     responses:
          *       200:
          *         description: The package has been successfully updated.
@@ -436,7 +446,7 @@ export class PackageRoutes {
          *             schema:
          *               $ref: '#/components/schemas/PackageFull'
          *       400:
-         *         description: Package does not exist or invalid input.
+         *         description: Package does not exist, invalid input, or unauthorized request.
          *         content:
          *           application/json:
          *             schema:
@@ -449,7 +459,7 @@ export class PackageRoutes {
          *               $ref: '#/components/schemas/ErrorResponse'
         */
 
-        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin], controller.modifyPackage);
+        router.put('/', [AuthMiddleware.validateJWT, AuthMiddleware.isAdmin, FileTypeMiddleware.validateExtension], controller.modifyPackage);
 
         return router;
     }

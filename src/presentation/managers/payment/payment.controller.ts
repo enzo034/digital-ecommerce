@@ -21,4 +21,13 @@ export class PaymentController {
             .catch(error => handleError(res, error));
     }
 
+    paymentWebhook = (req: Request, res: Response) => {
+        /* const [error, paymentWebhookDto] = PaymentWebhookDto.create(req.body);
+        if (error) return res.status(400).json({ error });
+
+        this.paymentService.paymentWebhook(paymentWebhookDto!)
+            .then(resp => res.json({resp}))
+            .catch(error => handleError(res, error)); */ //todo
+    }
+
 }

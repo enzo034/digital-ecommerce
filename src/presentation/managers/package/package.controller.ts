@@ -117,7 +117,7 @@ export class PackageController {
         const [error, modifyPackageDto] = ModifyPackageDto.create(req.body);
         if (error) return res.status(400).json({ error });
 
-        this.packageService.modifyPackage(modifyPackageDto!)
+        this.packageService.modifyPackage(modifyPackageDto!, req.body.files)
             .then(resp => res.status(201).json(resp))
             .catch(error => handleError(res, error));
     }

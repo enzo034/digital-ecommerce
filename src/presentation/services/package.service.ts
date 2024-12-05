@@ -34,21 +34,39 @@ export class PackageService {
 
     async getPackagesCommon(packageOptions: PackageOptions) {
         // Aquí pasamos `fetchPackages` con el contexto correcto
-        return await this.ecommerceQueryService.getResourcesCommon<PackageDocument>(PackageModel, PackageEntity,this.fetchPackages.bind(this), packageOptions);
+        return await this.ecommerceQueryService.getResourcesCommon<PackageDocument>(PackageModel, PackageEntity, this.fetchPackages.bind(this), packageOptions);
     }
 
 
     async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> {
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
+        const populate = this.shouldPopulate(isAdmin);
 
         const packages = await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
+            .populate(populate)
             .skip((page - 1) * limit)
             .limit(limit)
-            .sort(orderBy);
+            .sort(orderBy)
 
         return packages;
+    }
+
+    shouldPopulate(isAdmin: boolean): { path: string; select: string }[] {
+
+        const categoriesPath = { path: 'categories', select: 'name timesSold' }; //Select en ambos para seleccionar solo ciertos campos
+        const sourceFilesPath = { path: 'sourceFiles', select: 'name link' };
+
+        if (isAdmin) {
+            return [
+                categoriesPath,
+                sourceFilesPath
+            ];
+        }
+        return [
+            categoriesPath 
+        ];
     }
 
     //#endregion
@@ -99,26 +117,49 @@ export class PackageService {
     //#endregion
 
     //#region ModifyPackage
-    async modifyPackage(modifyPackageDto: ModifyPackageDto) {
+    async modifyPackage(modifyPackageDto: ModifyPackageDto, imageFile: UploadedFile[]) {
 
         const packageModel = await PackageModel.findById(modifyPackageDto.id);
         if (!packageModel) throw CustomError.badRequest('Package does not exists')
+
+        let modifyPackage = modifyPackageDto;
+
+        if (imageFile) {
+
+            const newPrimaryImage = await this.imageService.processSingleImage(imageFile);
+
+            modifyPackage = { previewImage: newPrimaryImage!, ...modifyPackageDto }
+
+            const previousPublicId = this.extractPublicId(packageModel.previewImage);
+
+            if (previousPublicId) {
+                this.imageService.deleteImages(previousPublicId);
+            }            
+        }
 
         try {
 
             const updatedPackage = await PackageModel.findByIdAndUpdate(
                 modifyPackageDto.id,
-                modifyPackageDto,
+                { $set: modifyPackage },
                 { new: true }
             );
 
             return PackageEntity.fromObject(updatedPackage!);
 
         } catch (error) {
-            throw new Error("Internal server error" + error);
+            throw CustomError.internalServer("Internal server error")
         }
 
     }
+
+    extractPublicId(url: string): string | null {
+        if (!url) return null;
+        const regex = /\/packages\/([^/?]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
+    
     //#endregion
 
 }
