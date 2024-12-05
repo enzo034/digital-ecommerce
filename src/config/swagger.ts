@@ -24,7 +24,111 @@ const swaggerDefinition: SwaggerDefinition = {
         : 'Servidor Local',
     },
   ],
+  components: {
+    schemas: {
+      PackageFull: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: '64f1e2dcb7a6c9c73f9e1234',
+          },
+          name: {
+            type: 'string',
+            example: 'Premium Package',
+          },
+          previewImage: {
+            type: 'string',
+            example: 'https://example.com/preview.jpg',
+          },
+          description: {
+            type: 'string',
+            example: 'This package includes exclusive features.',
+          },
+          price: {
+            type: 'number',
+            example: 29.99,
+          },
+          sourceFiles: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'SourceFile ID',
+            },
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'Category ID',
+            },
+          },
+          timesSold: {
+            type: 'integer',
+            example: 100,
+          },
+        },
+      },
+      PackagePartial: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: '64f1e2dcb7a6c9c73f9e1234',
+          },
+          name: {
+            type: 'string',
+            example: 'Premium Package',
+          },
+          previewImage: {
+            type: 'string',
+            example: 'https://example.com/preview.jpg',
+          },
+          description: {
+            type: 'string',
+            example: 'This package includes exclusive features.',
+          },
+          price: {
+            type: 'number',
+            example: 29.99,
+          },
+          timesSold: {
+            type: 'integer',
+            example: 100,
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'Category ID',
+            },
+          },
+        },
+      },
+      ErrorResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'integer',
+            example: 400,
+          },
+          message: {
+            type: 'string',
+            example: 'Invalid input',
+          },
+        },
+      },
+    },
+    securitySchemes: {
+      BearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
+  },
 };
+
 
 
 const routeExtension = envs.MY_APP_ENV === "production" ? "js" : "ts";
@@ -33,8 +137,6 @@ const routePath = path.resolve(
   process.cwd(),
   `dist/presentation/managers/**/*.routes.${routeExtension}`
 );
-
-console.log("Swagger busca en:", routePath);
 
 // Opciones para swagger-jsdoc
 const options: SwaggerOptions = {

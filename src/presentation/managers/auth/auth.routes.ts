@@ -25,14 +25,17 @@ export class AuthRoutes {
 
         const controller = new AuthController(authService);
 
-        // Definir las rutas
-
         /**
          * @swagger
          * tags:
          *   name: Auth
-         *   description: Rutas de autenticación
-         *
+         *   description: Authentication router for users
+        */
+
+        // Definir las rutas
+
+        /**
+         * @swagger
          * /api/auth/login:
          *   post:
          *     tags:
@@ -66,10 +69,6 @@ export class AuthRoutes {
 
         /**
          * @swagger
-         * tags:
-         *   name: Auth
-         *   description: User authentication and management routes
-         *
          * /api/auth/register:
          *   post:
          *     tags:
