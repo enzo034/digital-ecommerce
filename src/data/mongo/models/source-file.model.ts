@@ -1,5 +1,11 @@
-import {Schema, model} from "mongoose";
+import {Document, Schema, model} from "mongoose";
 
+interface SourceFile {
+    name: string,
+    link: string
+}
+
+export type SourceFileDocument = Document & SourceFile;
 
 const sourceFileSchema = new Schema({
 
@@ -27,4 +33,4 @@ sourceFileSchema.set('toJSON', {
 });
 
 
-export const SourceFileModel = model('SourceFile', sourceFileSchema);
+export const SourceFileModel = model<SourceFileDocument>('SourceFile', sourceFileSchema);

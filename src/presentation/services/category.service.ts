@@ -1,4 +1,5 @@
-import { CategoryDocument, CategoryModel } from "../../data/mongo";
+import { checkIfExistsById, isReferencedInModel } from "../../config/document-helper";
+import { CategoryDocument, CategoryModel, PackageModel } from "../../data/mongo";
 import { CreateCategoryDto, CustomError, ModifyCategoryDto, DeleteCategoryDto } from "../../domain";
 import { CategoryEntity } from "../../domain/entities/category.entity";
 
@@ -35,13 +36,13 @@ export class CategoryService {
             .select('name timesSold');
 
         if (!categories.length) throw CustomError.notFound('No categories found.');
-        
+
         return categories.map(category => CategoryEntity.fromObject(category));
     }
 
     async modifyCategory(modifyCategoryDto: ModifyCategoryDto) {
 
-        const category = await this.checkIfCategoryExistsById(modifyCategoryDto.id);
+        const category = await checkIfExistsById<CategoryDocument>(CategoryModel, modifyCategoryDto.id);
 
         category.name = modifyCategoryDto.name!;
 
@@ -51,17 +52,17 @@ export class CategoryService {
 
     }
 
-    async deleteCategory(deleteCategoryDto: DeleteCategoryDto) { //todo: verificar si se va a utilizar
-        const category = await this.checkIfCategoryExistsById(deleteCategoryDto.id);
+    async deleteCategory(deleteCategoryDto: DeleteCategoryDto) {
+
+        const { id } = deleteCategoryDto;
+
+        const category = await checkIfExistsById<CategoryDocument>(CategoryModel, id);
+
+        const isCategoryReferenced = await isReferencedInModel(PackageModel, 'categories', id);
+
+        if (isCategoryReferenced) throw CustomError.badRequest(`Can't delete category with id : ${id}. The document exists on a package.`)
+
         await category.deleteOne();
-    }
-
-    async checkIfCategoryExistsById(categoryId: string): Promise<CategoryDocument> {
-        const category = await CategoryModel.findById(categoryId);
-        if (!category)
-            throw CustomError.notFound(`Category with id: ${categoryId} not found.`);
-
-        return category;
     }
 
 }

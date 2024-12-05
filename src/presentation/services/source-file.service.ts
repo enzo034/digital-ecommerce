@@ -1,4 +1,5 @@
-import { SourceFileModel } from "../../data/mongo";
+import { checkIfExistsById, isReferencedInModel } from "../../config/document-helper";
+import { PackageModel, SourceFileDocument, SourceFileModel } from "../../data/mongo";
 import { CreateSourceFileDto, CustomError, DeleteSourceFileDto, ModifySourceFileDto } from "../../domain";
 import { SourceFileEntity } from "../../domain/entities/source-file.entity";
 
@@ -19,7 +20,7 @@ export class SourceFileService {
         const existingSourceFile = await SourceFileModel.findOne({
             $or: [{ name }, { link }]
         });
-    
+
         if (existingSourceFile) {
             const conflictField = existingSourceFile.name === name ? 'name' : 'link';
             throw CustomError.badRequest(`SourceFile ${conflictField} already exists`);
@@ -42,16 +43,17 @@ export class SourceFileService {
 
     async modifySourceFile(modifySourcefileDto: ModifySourceFileDto) {
 
-        const sourceFile = await SourceFileModel.findById(modifySourcefileDto.id);
-        if (!sourceFile) throw CustomError.notFound(`SourceFiles with id : ${modifySourcefileDto.id} not found.`);
+        const { id } = modifySourcefileDto;
+
+        await checkIfExistsById<SourceFileDocument>(SourceFileModel, id);
 
         const modifiedSourceFile = await SourceFileModel.findByIdAndUpdate(
-            modifySourcefileDto.id,
+            id,
             modifySourcefileDto,
             { new: true }
         );
 
-        if (!modifiedSourceFile) throw CustomError.notFound(`Unable to update sourceFile with id: ${modifySourcefileDto.id}`);
+        if (!modifiedSourceFile) throw CustomError.notFound(`Unable to update sourceFile with id: ${id}`);
 
         return SourceFileEntity.fromObject(modifiedSourceFile);
 
@@ -59,10 +61,16 @@ export class SourceFileService {
 
     async deleteSourceFile(deleteSourceFileDto: DeleteSourceFileDto) {
 
-        const sourceFile = await SourceFileModel.findById(deleteSourceFileDto.sourceFileId);
-        if (!sourceFile) throw CustomError.notFound(`SourceFile with id: ${deleteSourceFileDto.sourceFileId} not found.`);
+        const { sourceFileId } = deleteSourceFileDto;
 
-        await SourceFileModel.deleteOne({ _id: deleteSourceFileDto.sourceFileId });
+        const sourceFile = await checkIfExistsById<SourceFileDocument>(SourceFileModel, sourceFileId);
+
+        const isSourceFileReferenced = await isReferencedInModel(PackageModel, 'sourceFiles', sourceFileId);
+
+        if (isSourceFileReferenced) throw CustomError.badRequest(`Can't delete sourceFile with id : ${sourceFileId}. The document exists on a package.`)
+
+
+        await sourceFile.deleteOne();
 
     }
 

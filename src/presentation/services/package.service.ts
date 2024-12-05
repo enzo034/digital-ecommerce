@@ -6,10 +6,9 @@ import { ModifyPackageDto } from "../../domain/dtos/package/modify-package.dto";
 import { PaginationDto } from "../../domain/dtos/shared/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
 import { ImageService } from "./image.service";
-import { countDocuments, getNextPageUrl, getPreviousPageUrl } from "../../config/pagination-helper";
-import { parseEntities } from "../../domain/entities/Ientity";
 import { EcommerceQueryService } from "./ecommerce-query.service";
-import { Model } from "mongoose";
+
+
 
 type SortOrder = 1 | -1;
 
