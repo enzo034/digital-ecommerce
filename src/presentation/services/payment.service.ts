@@ -5,6 +5,7 @@ import { OrderDocument, OrderModel } from "../../data/mongo/models/order.model";
 import { PurchasesDocument, PurchasesModel } from "../../data/mongo/models/purchases.model";
 import { CustomError } from "../../domain";
 import { CreatePaymentDto } from "../../domain/dtos/payment/create-payment.dto";
+import { PurchaseEntity } from "../../domain/entities/purchase.entity";
 
 interface WebhookInformation {
     type: string,
@@ -84,11 +85,11 @@ export class PaymentService {
             session.endSession();
         }
     }
-    
+
     //#endregion
 
     //#region Manage Cryptomus Webhook
-    async paymentWebhook(payload: WebhookInformation): Promise<{ message: string, purchase?: PurchasesDocument }> {
+    async paymentWebhook(payload: WebhookInformation): Promise<{ message: string, purchase?: PurchaseEntity }> {
         if (payload.type !== "payout") throw CustomError.badRequest("Invalid webhook type");
 
         if (payload.status !== 'paid') {
@@ -98,7 +99,7 @@ export class PaymentService {
 
         const purchase = await this.confirmPurchase(payload.order_id);
 
-        return { message: "Purchase created successfully", purchase };
+        return { message: "Purchase created successfully", purchase: PurchaseEntity.fromObject(purchase) };
     }
 
     manageWebhookStatus(status: string): void {
@@ -193,5 +194,5 @@ export class PaymentService {
     }
 
     //#endregion
-    
+
 }

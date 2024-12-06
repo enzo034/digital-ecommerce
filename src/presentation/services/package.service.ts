@@ -127,7 +127,7 @@ export class PackageService {
 
             const newPrimaryImage = await this.imageService.processSingleImage(imageFile);
 
-            modifyPackage = { previewImage: newPrimaryImage!, ...modifyPackageDto }
+            modifyPackage = { ...modifyPackageDto, previewImage: newPrimaryImage! }
 
             const previousPublicId = this.extractPublicId(packageModel.previewImage);
 
