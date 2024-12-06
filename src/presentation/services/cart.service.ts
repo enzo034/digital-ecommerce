@@ -11,7 +11,7 @@ export class CartService {
     constructor() { }
 
 
-    async getCart(userId: string) {
+    async getCart(userId: string): Promise<CartEntity> {
 
         const cart = await CartModel.findOne({ user: userId })
             .populate({
@@ -20,10 +20,10 @@ export class CartService {
             });
         if (!cart) throw CustomError.notFound('Cart not found');
 
-        return cart;
+        return CartEntity.fromObject(cart);
     }
 
-    async addToCart(modifyCartDto: ModifyCartDto) {
+    async addToCart(modifyCartDto: ModifyCartDto): Promise<Record<string, any>> {
 
         const { userId, packageId } = modifyCartDto;
         let response = {
@@ -31,15 +31,12 @@ export class CartService {
             packageId: packageId, // Retorna el id del package
         };
 
+        const updateResult = await CartModel.findOne({ user: userId, packages: packageId });
+        if (updateResult) return response; // Si el package ya existe, devuelve el resultado
+
         // Busca el paquete directamente para obtener su precio
         const packageData = await PackageModel.findById(packageId).select('price');
         if (!packageData) throw CustomError.notFound('Package not found');
-
-        const updateResult = await CartModel.findOne(
-            { user: userId, "packages": packageId }
-        );
-
-        if (updateResult) return response; // Si el package ya existe, devuelve el resultado
 
         // Si el package no existía en el carrito, se agrega
         await CartModel.findOneAndUpdate(
@@ -64,9 +61,23 @@ export class CartService {
         const cart = await CartModel.findOne({ user: userId });
         if (!cart) throw CustomError.notFound('Cart not found');
 
+        // Verificar si el paquete está en el carrito
+        if (!cart.packages.includes(packageId)) {
+            throw CustomError.notFound('Package not found in cart');
+        }
+
         // Busca el package
         const packageData = await PackageModel.findById(packageId).select('price');
-        if (!packageData) throw CustomError.notFound('Package not found');
+        if (!packageData) {
+            // Si el paquete no existe en la base de datos, eliminarlo del carrito
+            await CartModel.findOneAndUpdate(
+                { user: userId },
+                {
+                    $pull: { packages: packageId },
+                }
+            );
+            return { message: 'Package not found in the database, removed from cart' };
+        }
 
         // Elimina el package y ajusta el totalPrice
         const updatedCart = await CartModel.findOneAndUpdate(
@@ -78,7 +89,9 @@ export class CartService {
             { new: true }
         );
 
-        return updatedCart;
+        if (!updatedCart) throw CustomError.internalServer('Internal server error, can not update the cart.');
+
+        return CartEntity.fromObject(updatedCart);
     }
 
 
