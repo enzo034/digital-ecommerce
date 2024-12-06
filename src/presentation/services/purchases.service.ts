@@ -20,8 +20,7 @@ export class PurchasesService {
 
     async fetchPurchases(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PurchasesDocument[]> {
 
-
-        const purchases = await PurchasesModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
+        const purchases = await PurchasesModel.find(where || {}) //Lo único que va a cambiar va a ser que el admin va a traer todas las compras y el usuario solo las de él
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy);
