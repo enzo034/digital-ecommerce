@@ -29,7 +29,7 @@ export class PaymentService {
     constructor() { }
 
     //#region Create Payment
-    async createPayment(createPaymentDto: CreatePaymentDto) {
+    async createPayment(createPaymentDto: CreatePaymentDto): Promise<string> {
 
         const { userId } = createPaymentDto;
 

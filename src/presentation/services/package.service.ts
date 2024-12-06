@@ -37,7 +37,7 @@ export class PackageService {
     }
 
 
-    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> {
+    async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> { // * No se devuelve una entidad ya que dentro de getPackagesCommon se parsean antes de ser devueltas desde fetch
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
         const populate = this.shouldPopulate(isAdmin);
