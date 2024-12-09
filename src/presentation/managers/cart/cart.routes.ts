@@ -30,19 +30,13 @@ export class CartRoutes {
 
         /**
          * @swagger
-         * /api/cart/{userId}:
+         * /api/cart:
          *   get:
          *     tags:
          *       - Cart
          *     summary: Retrieve user's cart
-         *     parameters:
-         *       - in: path
-         *         name: userId
-         *         required: true
-         *         description: ID of the user whose cart is being retrieved
-         *         schema:
-         *           type: string
-         *           example: 64f1e2dcb7a6c9c73f9e1234
+         *     security:
+         *       - BearerAuth: []
          *     responses:
          *       200:
          *         description: User's cart retrieved successfully
@@ -59,24 +53,25 @@ export class CartRoutes {
          *                   type: array
          *                   description: List of packages in the cart
          *                   items:
-         *                     type: object
-         *                     properties:
-         *                       name:
-         *                         type: string
-         *                         description: Name of the package
-         *                         example: "Premium Photography Package"
-         *                       price:
-         *                         type: number
-         *                         description: Price of the package
-         *                         example: 299.99
-         *                       description:
-         *                         type: string
-         *                         description: Details about the package
-         *                         example: "Includes 10 edited photos and a 2-hour session"
+         *                     $ref: '#/components/schemas/PackagePartial'
+         *       401:
+         *         description: Unauthorized
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/ErrorResponse'
          *       404:
          *         description: Cart not found
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/ErrorResponse'
          *       500:
          *         description: Internal server error
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/ErrorResponse'
         */
 
         router.get('/', [AuthMiddleware.validateJWT], controller.getCart);
