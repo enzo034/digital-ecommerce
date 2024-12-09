@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PaymentService } from "../../services/payment.service";
 import { CreatePaymentDto } from "../../../domain/dtos/payment/create-payment.dto";
 import { handleError } from "../../../config/handle-error";
+import { WebhookPaymentDto } from "../../../domain/dtos/payment/webhook-payment.dto";
 
 
 
@@ -22,12 +23,12 @@ export class PaymentController {
     }
 
     paymentWebhook = (req: Request, res: Response) => {
-        /* const [error, paymentWebhookDto] = PaymentWebhookDto.create(req.body);
+        const [error, webhookPaymentDto] = WebhookPaymentDto.create(req.body);
         if (error) return res.status(400).json({ error });
 
-        this.paymentService.paymentWebhook(paymentWebhookDto!)
+        this.paymentService.paymentWebhook(webhookPaymentDto!)
             .then(resp => res.json({resp}))
-            .catch(error => handleError(res, error)); */ //todo
+            .catch(error => handleError(res, error));
     }
 
 }

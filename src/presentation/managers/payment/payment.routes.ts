@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { AuthMiddleware } from '../../middlewares/auth.middleware'; 
 import { PaymentController } from './payment.controller';
 import { PaymentService } from '../../services/payment.service';
+import { verifySignature } from '../../middlewares/verify-signature.middleware';
 
 
 
@@ -71,6 +72,8 @@ export class PaymentRoutes {
         */
 
         router.post('/', [AuthMiddleware.validateJWT], controller.createPayment); 
+
+        router.post('/webhook', verifySignature, controller.paymentWebhook);
 
         return router;
     }

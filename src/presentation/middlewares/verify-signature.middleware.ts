@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { NextFunction, Response } from 'express';
 
-const verifySignature = (req: any, res: Response, next: NextFunction) => {
+export const verifySignature = (req: any, res: Response, next: NextFunction) => {
     const { sign } = req.body;
 
     if (!sign) {
@@ -29,4 +29,3 @@ const verifySignature = (req: any, res: Response, next: NextFunction) => {
     }
 };
 
-module.exports = verifySignature;

@@ -6,23 +6,8 @@ import { PurchasesDocument, PurchasesModel } from "../../data/mongo/models/purch
 import { CustomError } from "../../domain";
 import { CreatePaymentDto } from "../../domain/dtos/payment/create-payment.dto";
 import { PurchaseEntity } from "../../domain/entities/purchase.entity";
+import { WebhookPaymentDto } from "../../domain/dtos/payment/webhook-payment.dto";
 
-interface WebhookInformation {
-    type: string,
-    uuid: string,
-    order_id: string,
-    amount: string,
-    merchang_amount: string,
-    commission: string,
-    is_final: boolean,
-    status: string,
-    txid: string,
-    currency: string,
-    network: string,
-    payer_currency: string,
-    payer_amount: string,
-    sign: string
-}
 
 export class PaymentService {
 
@@ -89,15 +74,14 @@ export class PaymentService {
     //#endregion
 
     //#region Manage Cryptomus Webhook
-    async paymentWebhook(payload: WebhookInformation): Promise<{ message: string, purchase?: PurchaseEntity }> {
-        if (payload.type !== "payout") throw CustomError.badRequest("Invalid webhook type");
+    async paymentWebhook(payload: WebhookPaymentDto): Promise<{ message: string, purchase?: PurchaseEntity }> {
+        if (payload.webhookInfo.type !== "payout") throw CustomError.badRequest(`Invalid webhook type: ${payload.webhookInfo.type}`);
 
-        if (payload.status !== 'paid') {
-            this.manageWebhookStatus(payload.status);
-            return { message: `Webhook processed with status: ${payload.status}` };
+        if (payload.webhookInfo.status !== 'paid') {
+            this.manageWebhookStatus(payload.webhookInfo.status);
         }
 
-        const purchase = await this.confirmPurchase(payload.order_id);
+        const purchase = await this.confirmPurchase(payload.webhookInfo.order_id);
 
         return { message: "Purchase created successfully", purchase: PurchaseEntity.fromObject(purchase) };
     }
