@@ -8,6 +8,7 @@ interface Package {
     sourceFiles: string[]; // Referencias a ObjectIds de SourceFile
     categories: string[]; // Referencias a ObjectIds de Category
     timesSold: number;
+    isActive: boolean;
 }
 
 export type PackageDocument = Document & Package;
@@ -40,6 +41,10 @@ const packageSchema = new Schema({
     timesSold: {
         type: Number,
         default: 0
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
     }
 
 });

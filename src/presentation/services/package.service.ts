@@ -41,8 +41,9 @@ export class PackageService {
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
         const populate = this.shouldPopulate(isAdmin);
+        const modifiedWhere = this.addNonAdminFilters(where, isAdmin);
 
-        const packages = await PackageModel.find(where || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
+        const packages = await PackageModel.find(modifiedWhere || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
             .populate(populate)
             .skip((page - 1) * limit)
@@ -52,7 +53,7 @@ export class PackageService {
         return packages;
     }
 
-    shouldPopulate(isAdmin: boolean): { path: string; select: string }[] {
+    private shouldPopulate(isAdmin: boolean): { path: string; select: string }[] {
 
         const categoriesPath = { path: 'categories', select: 'name timesSold' }; //Select en ambos para seleccionar solo ciertos campos
         const sourceFilesPath = { path: 'sourceFiles', select: 'name link' };
@@ -66,6 +67,17 @@ export class PackageService {
         return [
             categoriesPath 
         ];
+    }
+
+    private addNonAdminFilters(where: any, isAdmin: boolean): any { //Para llevar solo los package disponibles a los que no son admin
+        if (isAdmin) {
+            return where || {};
+        }
+    
+        return {
+            ...where,
+            isActive: true 
+        };
     }
 
     //#endregion
@@ -85,7 +97,7 @@ export class PackageService {
 
     }
 
-    shouldSendSourceFiles(isAdmin: boolean): string {
+    private shouldSendSourceFiles(isAdmin: boolean): string {
         return isAdmin ? '' : '-sourceFiles';
     }
 

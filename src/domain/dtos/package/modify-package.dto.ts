@@ -8,11 +8,12 @@ export class ModifyPackageDto {
         public readonly description?: string,
         public readonly price?: number,
         public readonly sourceFiles?: string[],
-        public readonly categories?: string[]
+        public readonly categories?: string[],
+        public readonly isActive?: boolean,
     ) { }
 
     static create(object: { [key: string]: any }): [string?, ModifyPackageDto?] {
-        const { id, name, previewImage, description, price, sourceFiles, categories } = object;
+        const { id, name, previewImage, description, price, sourceFiles, categories, isActive } = object;
 
         if (!id) return ['Missing packageId'];
         if (!isMongoId(id)) return ['PackageId is not a valid id'];
@@ -36,6 +37,6 @@ export class ModifyPackageDto {
             }
         }
 
-        return [undefined, new ModifyPackageDto(id, name, previewImage, description, parsedPrice, sourceFiles, categories)];
+        return [undefined, new ModifyPackageDto(id, name, previewImage, description, parsedPrice, sourceFiles, categories, isActive)];
     }
 }
