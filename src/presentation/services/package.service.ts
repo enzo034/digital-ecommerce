@@ -40,11 +40,12 @@ export class PackageService {
     async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> { // * No se devuelve una entidad ya que dentro de getPackagesCommon se parsean antes de ser devueltas desde fetch
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
-
+        const populate = this.howShouldPopulate(isAdmin);
         const modifiedWhere = this.addNonAdminFilters(where, isAdmin);
 
         const packages = await PackageModel.find(modifiedWhere || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
+            .populate(populate)
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy)
