@@ -1,7 +1,7 @@
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import { envs } from './envs';
 import { UploadedFile } from 'express-fileupload';
-import { CustomError } from '../domain';
+import { CustomError } from '../domain/errors/custom-error';
 
 cloudinary.config({
   cloud_name: envs.CLOUDINARY_CLOUD_NAME,

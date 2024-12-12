@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { handleError } from "../../../config/handle-error";
 import { EcommerceQueryService, HandleGetEntities } from "../../services/ecommerce-query.service";
 import { PurchasesService } from "../../services/purchases.service";
-import { CustomError } from "../../../domain";
+import { CustomError } from "../../../domain/errors/custom-error";
 
 
 

@@ -1,8 +1,9 @@
 
-import { CartModel, PackageModel } from "../../data/mongo";
-import { CustomError } from "../../domain";
+import { CartModel } from "../../data/mongo/models/cart.model";
+import { PackageModel } from "../../data/mongo/models/package.model";
 import { ModifyCartDto } from "../../domain/dtos/cart/add-item-to-cart.dto";
 import { CartEntity } from "../../domain/entities/cart.entity";
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 

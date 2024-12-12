@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { CustomError } from "../domain";
+import { CustomError } from "../domain/errors/custom-error";
 
 
 

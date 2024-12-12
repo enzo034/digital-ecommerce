@@ -1,8 +1,12 @@
-import { JwtAdapter, BcryptAdapter, envs } from "../../config";
-import { UserModel } from "../../data/mongo";
-import { CustomError, LoginUserDto, RegisterUserDto } from "../../domain";
-//import { prisma } from "../../data/postgres";
+
+import { BcryptAdapter } from "../../config/bcrypt.adapter";
+import { envs } from "../../config/envs";
+import { JwtAdapter } from "../../config/jwt.adapter";
+import { UserModel } from "../../data/mongo/models/user.model";
+import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
+import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
 import { UserEntity } from "../../domain/entities/user.entity";
+import { CustomError } from "../../domain/errors/custom-error";
 import { EmailService } from "./email.service";
 
 

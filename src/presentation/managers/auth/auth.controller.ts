@@ -1,10 +1,8 @@
-
-
-
 import { Request, Response } from "express";
-import { RegisterUserDto, LoginUserDto } from "../../../domain";
 import { handleError } from "../../../config/handle-error";
 import { AuthService } from "../../services/auth.service";
+import { RegisterUserDto } from "../../../domain/dtos/auth/register-user.dto";
+import { LoginUserDto } from "../../../domain/dtos/auth/login-user.dto";
 
 
 

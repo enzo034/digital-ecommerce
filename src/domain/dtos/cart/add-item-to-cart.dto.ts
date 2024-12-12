@@ -1,4 +1,5 @@
-import { isMongoId } from "../../../config";
+import { isMongoId } from "../../../config/regular-exp";
+
 
 export class ModifyCartDto {
     private constructor(

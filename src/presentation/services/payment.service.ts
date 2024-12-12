@@ -1,12 +1,15 @@
 import mongoose, { ClientSession } from "mongoose";
 import { PaymentAdapter } from "../../config/payment.adapter";
-import { CartDocument, CartModel, CategoryModel, PackageModel, UserModel } from "../../data/mongo";
 import { OrderDocument, OrderModel } from "../../data/mongo/models/order.model";
 import { PurchasesDocument, PurchasesModel } from "../../data/mongo/models/purchases.model";
-import { CustomError } from "../../domain";
 import { CreatePaymentDto } from "../../domain/dtos/payment/create-payment.dto";
 import { PurchaseEntity } from "../../domain/entities/purchase.entity";
 import { WebhookPaymentDto } from "../../domain/dtos/payment/webhook-payment.dto";
+import { CartDocument, CartModel } from "../../data/mongo/models/cart.model";
+import { PackageModel } from "../../data/mongo/models/package.model";
+import { CategoryModel } from "../../data/mongo/models/category.model";
+import { UserModel } from "../../data/mongo/models/user.model";
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 export class PaymentService {

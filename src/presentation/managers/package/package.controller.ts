@@ -2,20 +2,9 @@ import { Request, Response } from "express";
 import { handleError } from "../../../config/handle-error";
 import { PackageService } from "../../services/package.service";
 import { CreatePackageDto } from "../../../domain/dtos/package/create-package.dto";
-import { PaginationDto } from "../../../domain/dtos/shared/pagination.dto";
 import { ModifyPackageDto } from "../../../domain/dtos/package/modify-package.dto";
-import { isMongoId } from "../../../config";
 import { EcommerceQueryService, HandleGetEntities } from "../../services/ecommerce-query.service";
-
-type SortOrder = 1 | -1;
-
-type QueryParams = {
-    page: string;
-    limit: string;
-    orderBy?: string;
-    minPrice?: string;
-    maxPrice?: string;
-};
+import { isMongoId } from "../../../config/regular-exp";
 
 export class PackageController {
 

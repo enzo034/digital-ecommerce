@@ -1,4 +1,4 @@
-import { isMongoId } from "../../../config";
+import { isMongoId } from "../../../config/regular-exp";
 
 
 
@@ -16,7 +16,7 @@ export class CreatePaymentDto {
         const { userId } = object;
 
         if (!userId) return ['Missing userId'];
-        if(!isMongoId(userId)) return ['user Id is not a valid id'];
+        if (!isMongoId(userId)) return ['user Id is not a valid id'];
 
         return [undefined, new CreatePaymentDto(userId)];
 

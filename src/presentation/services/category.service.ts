@@ -1,7 +1,11 @@
 import { checkIfExistsById, isReferencedInModel } from "../../config/document-helper";
-import { CategoryDocument, CategoryModel, PackageModel } from "../../data/mongo";
-import { CreateCategoryDto, CustomError, ModifyCategoryDto, DeleteCategoryDto } from "../../domain";
+import { CategoryDocument, CategoryModel } from "../../data/mongo/models/category.model";
+import { PackageModel } from "../../data/mongo/models/package.model";
+import { CreateCategoryDto } from "../../domain/dtos/category/create-category.dto";
+import { DeleteCategoryDto } from "../../domain/dtos/category/delete-category.dto";
+import { ModifyCategoryDto } from "../../domain/dtos/category/modify-category.dto";
 import { CategoryEntity } from "../../domain/entities/category.entity";
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 

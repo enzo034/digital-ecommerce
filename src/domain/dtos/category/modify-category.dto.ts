@@ -1,4 +1,4 @@
-import { isMongoId } from "../../../config";
+import { isMongoId } from "../../../config/regular-exp";
 
 
 

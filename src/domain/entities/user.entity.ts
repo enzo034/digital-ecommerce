@@ -1,4 +1,4 @@
-import { isMongoId } from "../../config";
+import { isMongoId } from "../../config/regular-exp";
 import { CustomError } from "../errors/custom-error";
 
 export enum UserRole {

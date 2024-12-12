@@ -1,7 +1,11 @@
 import { checkIfExistsById, isReferencedInModel } from "../../config/document-helper";
-import { PackageModel, SourceFileDocument, SourceFileModel } from "../../data/mongo";
-import { CreateSourceFileDto, CustomError, DeleteSourceFileDto, ModifySourceFileDto } from "../../domain";
+import { PackageModel } from "../../data/mongo/models/package.model";
+import { SourceFileDocument, SourceFileModel } from "../../data/mongo/models/source-file.model";
+import { CreateSourceFileDto } from "../../domain/dtos/sourceFile/create-source-file.dto";
+import { DeleteSourceFileDto } from "../../domain/dtos/sourceFile/delete-source-file.dto";
+import { ModifySourceFileDto } from "../../domain/dtos/sourceFile/modify-source-file.dto";
 import { SourceFileEntity } from "../../domain/entities/source-file.entity";
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 

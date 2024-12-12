@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { handleError } from "../../../config/handle-error";
-import { DeleteSourceFileDto, ModifySourceFileDto, CreateSourceFileDto } from "../../../domain";
 import { SourceFileService } from "../../services/source-file.service";
+import { CreateSourceFileDto } from "../../../domain/dtos/sourceFile/create-source-file.dto";
+import { DeleteSourceFileDto } from "../../../domain/dtos/sourceFile/delete-source-file.dto";
+import { ModifySourceFileDto } from "../../../domain/dtos/sourceFile/modify-source-file.dto";
 
 
 

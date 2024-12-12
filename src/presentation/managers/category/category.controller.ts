@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { handleError } from "../../../config/handle-error";
-import { CreateCategoryDto, ModifyCategoryDto, DeleteCategoryDto } from "../../../domain";
 import { CategoryService } from "../../services/category.service";
+import { CreateCategoryDto } from "../../../domain/dtos/category/create-category.dto";
+import { DeleteCategoryDto } from "../../../domain/dtos/category/delete-category.dto";
+import { ModifyCategoryDto } from "../../../domain/dtos/category/modify-category.dto";
 
 
 

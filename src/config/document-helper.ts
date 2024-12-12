@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { CustomError } from "../domain";
+import { CustomError } from "../domain/errors/custom-error";
 
 
 

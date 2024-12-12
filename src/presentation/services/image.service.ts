@@ -1,9 +1,6 @@
 import { UploadedFile } from "express-fileupload";
 import { ImageUploader, CloudinaryUploadResult } from "../../config/image-uploader.adapter";
-import { CustomError } from "../../domain";
-
-
-
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 

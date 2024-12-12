@@ -1,12 +1,12 @@
 import { UploadedFile } from "express-fileupload";
-import { PackageDocument, PackageModel } from "../../data/mongo";
-import { CustomError } from "../../domain";
 import { CreatePackageDto } from "../../domain/dtos/package/create-package.dto";
 import { ModifyPackageDto } from "../../domain/dtos/package/modify-package.dto";
 import { PaginationDto } from "../../domain/dtos/shared/pagination.dto";
 import { PackageEntity } from "../../domain/entities/package.entity";
 import { ImageService } from "./image.service";
 import { EcommerceQueryService } from "./ecommerce-query.service";
+import { PackageDocument, PackageModel } from "../../data/mongo/models/package.model";
+import { CustomError } from "../../domain/errors/custom-error";
 
 
 
