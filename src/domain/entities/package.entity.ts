@@ -16,13 +16,14 @@ export class PackageEntity {
         public price: number,
         public categories: string[],
         public sourceFiles?: string[],
+        public isActive?: boolean,
 
     ) { }
 
 
     static fromObject(object: { [key: string]: any; }): PackageEntity {
 
-        const { id, name, previewImage, description, price, sourceFiles, categories } = object;
+        const { id, name, previewImage, description, price, sourceFiles, categories, isActive } = object;
 
         if (!id) throw CustomError.badRequest('Missing id');
         if (!isMongoId(id)) throw CustomError.badRequest('Client Id is not a valid Id');
@@ -41,7 +42,7 @@ export class PackageEntity {
 
         if (!Array.isArray(categories)) throw CustomError.badRequest('Categories should be an array');
 
-        return new PackageEntity(id, name, previewImage, description, price, categories, sourceFiles);
+        return new PackageEntity(id, name, previewImage, description, price, categories, sourceFiles, isActive);
 
     };
 
