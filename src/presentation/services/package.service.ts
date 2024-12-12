@@ -40,12 +40,11 @@ export class PackageService {
     async fetchPackages(where: any, page: number, limit: number, orderBy: any, isAdmin: boolean = false): Promise<PackageDocument[]> { // * No se devuelve una entidad ya que dentro de getPackagesCommon se parsean antes de ser devueltas desde fetch
 
         const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
-        const populate = this.shouldPopulate(isAdmin);
+
         const modifiedWhere = this.addNonAdminFilters(where, isAdmin);
 
         const packages = await PackageModel.find(modifiedWhere || {}) //todo: si el rendimiento baja, hacer la páginación con cursores en lugar de usar .skip
             .select(sendSourceFiles)
-            .populate(populate)
             .skip((page - 1) * limit)
             .limit(limit)
             .sort(orderBy)
@@ -53,30 +52,18 @@ export class PackageService {
         return packages;
     }
 
-    private shouldPopulate(isAdmin: boolean): { path: string; select: string }[] {
-
-        const categoriesPath = { path: 'categories', select: 'name timesSold' }; //Select en ambos para seleccionar solo ciertos campos
-        const sourceFilesPath = { path: 'sourceFiles', select: 'name link' };
-
-        if (isAdmin) {
-            return [
-                categoriesPath,
-                sourceFilesPath
-            ];
-        }
-        return [
-            categoriesPath 
-        ];
+    private shouldSendSourceFiles(isAdmin: boolean): string {
+        return isAdmin ? '+sourceFiles' : '-sourceFiles';
     }
 
     private addNonAdminFilters(where: any, isAdmin: boolean): any { //Para llevar solo los package disponibles a los que no son admin
         if (isAdmin) {
             return where || {};
         }
-    
+
         return {
             ...where,
-            isActive: true 
+            isActive: true
         };
     }
 
@@ -86,10 +73,10 @@ export class PackageService {
 
     async getPackageById(id: string, isAdmin: boolean = false): Promise<PackageEntity> {
 
-        const sendSourceFiles = this.shouldSendSourceFiles(isAdmin);
+        const populate = this.howShouldPopulate(isAdmin);
 
         const pkg = await PackageModel.findById(id)
-            .select(sendSourceFiles)
+            .populate(populate)
 
         if (!pkg) throw CustomError.notFound(`The package with id ${id} was not found.`)
 
@@ -97,8 +84,11 @@ export class PackageService {
 
     }
 
-    private shouldSendSourceFiles(isAdmin: boolean): string {
-        return isAdmin ? '' : '-sourceFiles';
+    private howShouldPopulate(isAdmin: boolean): Array<{ path: string; select: string }> {
+        const categoriesPath = { path: 'categories', select: 'name timesSold' };
+        const sourceFilesPath = { path: 'sourceFiles', select: isAdmin ? 'name link' : 'name' };
+
+        return [categoriesPath, sourceFilesPath];
     }
 
     //#endregion
@@ -145,7 +135,7 @@ export class PackageService {
 
             if (previousPublicId) {
                 this.imageService.deleteImages(previousPublicId);
-            }            
+            }
         }
 
         try {
@@ -170,7 +160,7 @@ export class PackageService {
         const match = url.match(regex);
         return match ? match[1] : null;
     }
-    
+
     //#endregion
 
 }
