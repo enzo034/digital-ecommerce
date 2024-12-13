@@ -1,5 +1,5 @@
 import { envs } from './config/envs';
-import { MongoDatabase } from './data/mongo/mongo-database';
+import { initializeServices } from './config/initializers';
 import { AppRoutes } from './presentation/routes';
 import { Server } from './presentation/server';
 
@@ -11,10 +11,7 @@ import { Server } from './presentation/server';
 
 async function main() {
 
-  await MongoDatabase.connect({
-    dbName: envs.MONGO_DB_NAME,
-    mongoUrl: envs.MONGO_URL
-  });
+  await initializeServices();
 
   const server = new Server({
     port: envs.PORT,

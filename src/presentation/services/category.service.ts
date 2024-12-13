@@ -1,12 +1,12 @@
 import { checkIfExistsById, isReferencedInModel } from "../../config/document-helper";
 import { CategoryDocument, CategoryModel } from "../../data/mongo/models/category.model";
 import { PackageModel } from "../../data/mongo/models/package.model";
+import { redis } from "../../data/redis/redis";
 import { CreateCategoryDto } from "../../domain/dtos/category/create-category.dto";
 import { DeleteCategoryDto } from "../../domain/dtos/category/delete-category.dto";
 import { ModifyCategoryDto } from "../../domain/dtos/category/modify-category.dto";
 import { CategoryEntity } from "../../domain/entities/category.entity";
 import { CustomError } from "../../domain/errors/custom-error";
-
 
 
 
@@ -27,10 +27,21 @@ export class CategoryService {
     }
 
     async getCategories() {
+
+        const redisCategories = await redis.get("categories");
+        
+        if(redisCategories) {
+            return JSON.parse(redisCategories);
+        }
+
         const categories = await CategoryModel.find();
         if (!categories.length) throw CustomError.notFound('No categories found.');
 
-        return categories.map(category => CategoryEntity.fromObject(category)); // Se retornan las entidades de las categorias.
+        const categoriesEntity = categories.map(category => CategoryEntity.fromObject(category));
+
+        await redis.set("categories", JSON.stringify(categoriesEntity), "EX", 86400); // En segundos - 24 horas = 86400
+
+        return  categoriesEntity// Se retornan las entidades de las categorias.
     }
 
     async getPopularCategories() {

@@ -24,7 +24,9 @@ export const envs = {
   CLOUDINARY_API_SECRET: get("CLOUDINARY_API_SECRET").required().asString(),
 
   MONGO_DB_NAME: get('MONGO_DB_NAME').required().asString(),
-  MONGO_URL: get('MONGO_URL').required().asUrlString()
+  MONGO_URL: get('MONGO_URL').required().asUrlString(),
+
+  REDIS_URL: get('REDIS_URL').required().asUrlString()
 
 }
 
